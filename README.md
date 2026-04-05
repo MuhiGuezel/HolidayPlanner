@@ -1,10 +1,10 @@
-# 🏖️ Holiday Planner
+# Holiday Planner
 
 A web application that provides a platform where municipalities can offer events that can be booked by parents for their children during school holidays.
 
 ---
 
-## 👥 Team Members
+## Team Members
 
 | Name | Service Responsibility |
 |---|---|
@@ -20,7 +20,7 @@ A web application that provides a platform where municipalities can offer events
 
 ---
 
-## 🛠️ Services
+## Services
 
 | Service | Responsibility | Branch |
 |---|---|---|
@@ -34,7 +34,7 @@ A web application that provides a platform where municipalities can offer events
 
 ---
 
-## 🔗 Repository
+## Repository
 
 **Main Repository:** [https://github.com/MuhiGuezel/HolidayPlanner](https://github.com/MuhiGuezel/HolidayPlanner)
 
@@ -44,7 +44,7 @@ Each service is developed on its own branch (see table above). All services will
 
 ---
 
-## 💻 Technology Decisions
+## Technology Decisions
 
 ### Language & Framework
 All services are implemented using **Java** with **Spring Boot**.
@@ -67,7 +67,7 @@ All services are implemented using **Java** with **Spring Boot**.
 
 ---
 
-## 📁 Project Structure
+## Project Structure
 
 ```
 HolidayPlanner/
@@ -87,7 +87,7 @@ HolidayPlanner/
 
 ---
 
-## 🚀 What Has Been Prepared So Far
+## What Has Been Prepared So Far
 
 - [x] Team formed and service responsibilities assigned
 - [x] GitHub repository created: [HolidayPlanner](https://github.com/MuhiGuezel/HolidayPlanner)
@@ -101,7 +101,7 @@ HolidayPlanner/
 
 ---
 
-## 🏗️ How to Build & Run (per service)
+## How to Build & Run (per service)
 
 Each service can be built and run independently:
 
