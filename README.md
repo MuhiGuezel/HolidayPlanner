@@ -1,1 +1,1 @@
-# HolidyPlanner
+# HolidayPlanner
