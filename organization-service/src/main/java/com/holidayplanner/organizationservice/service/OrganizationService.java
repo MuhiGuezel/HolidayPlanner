@@ -1,6 +1,6 @@
 package com.holidayplanner.organizationservice.service;
 
-import com.holidayplanner.organizationservice.model.*;
+import com.holidayplanner.shared.model.*;
 import com.holidayplanner.organizationservice.repository.*;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;

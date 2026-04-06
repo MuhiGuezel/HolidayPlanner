@@ -1,4 +1,4 @@
-package com.holidayplanner.paymentservice.model;
+package com.holidayplanner.shared.model;
 
 public enum PaymentStatus {
     PENDING,

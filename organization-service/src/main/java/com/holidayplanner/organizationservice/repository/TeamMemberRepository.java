@@ -1,6 +1,6 @@
 package com.holidayplanner.organizationservice.repository;
 
-import com.holidayplanner.organizationservice.model.TeamMember;
+import com.holidayplanner.shared.model.TeamMember;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.stereotype.Repository;
 

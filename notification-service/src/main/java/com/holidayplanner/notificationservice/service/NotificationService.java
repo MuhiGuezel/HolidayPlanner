@@ -1,6 +1,5 @@
 package com.holidayplanner.notificationservice.service;
 
-import com.holidayplanner.notificationservice.model.EmailRequest;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.mail.SimpleMailMessage;

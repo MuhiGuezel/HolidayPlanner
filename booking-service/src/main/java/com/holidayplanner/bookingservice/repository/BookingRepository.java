@@ -1,7 +1,7 @@
 package com.holidayplanner.bookingservice.repository;
 
-import com.holidayplanner.bookingservice.model.Booking;
-import com.holidayplanner.bookingservice.model.BookingStatus;
+import com.holidayplanner.shared.model.Booking;
+import com.holidayplanner.shared.model.BookingStatus;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.stereotype.Repository;
 

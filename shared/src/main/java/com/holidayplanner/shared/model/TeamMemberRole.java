@@ -1,4 +1,4 @@
-package com.holidayplanner.organizationservice.model;
+package com.holidayplanner.shared.model;
 
 public enum TeamMemberRole {
     TEAM_MEMBER,

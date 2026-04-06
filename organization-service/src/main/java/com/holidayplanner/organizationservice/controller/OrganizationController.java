@@ -1,6 +1,6 @@
 package com.holidayplanner.organizationservice.controller;
 
-import com.holidayplanner.organizationservice.model.*;
+import com.holidayplanner.shared.model.*;
 import com.holidayplanner.organizationservice.service.OrganizationService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.ResponseEntity;

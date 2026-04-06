@@ -1,6 +1,6 @@
 package com.holidayplanner.notificationservice.controller;
 
-import com.holidayplanner.notificationservice.model.EmailRequest;
+import com.holidayplanner.shared.model.EmailRequest;
 import com.holidayplanner.notificationservice.service.NotificationService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.ResponseEntity;

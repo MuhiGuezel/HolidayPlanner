@@ -1,7 +1,7 @@
 package com.holidayplanner.paymentservice.service;
 
-import com.holidayplanner.paymentservice.model.Payment;
-import com.holidayplanner.paymentservice.model.PaymentStatus;
+import com.holidayplanner.shared.model.Payment;
+import com.holidayplanner.shared.model.PaymentStatus;
 import com.holidayplanner.paymentservice.repository.PaymentRepository;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;

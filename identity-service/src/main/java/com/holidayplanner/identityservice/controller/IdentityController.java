@@ -1,8 +1,8 @@
 package com.holidayplanner.identityservice.controller;
 
-import com.holidayplanner.identityservice.model.Caregiver;
-import com.holidayplanner.identityservice.model.FamilyMember;
-import com.holidayplanner.identityservice.model.User;
+import com.holidayplanner.shared.model.Caregiver;
+import com.holidayplanner.shared.model.FamilyMember;
+import com.holidayplanner.shared.model.User;
 import com.holidayplanner.identityservice.service.IdentityService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.ResponseEntity;

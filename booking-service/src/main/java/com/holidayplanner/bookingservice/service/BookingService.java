@@ -1,7 +1,7 @@
 package com.holidayplanner.bookingservice.service;
 
-import com.holidayplanner.bookingservice.model.Booking;
-import com.holidayplanner.bookingservice.model.BookingStatus;
+import com.holidayplanner.shared.model.Booking;
+import com.holidayplanner.shared.model.BookingStatus;
 import com.holidayplanner.bookingservice.repository.BookingRepository;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;

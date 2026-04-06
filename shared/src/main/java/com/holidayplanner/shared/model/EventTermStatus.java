@@ -1,4 +1,4 @@
-package com.holidayplanner.eventservice.model;
+package com.holidayplanner.shared.model;
 
 public enum EventTermStatus {
     DRAFT,

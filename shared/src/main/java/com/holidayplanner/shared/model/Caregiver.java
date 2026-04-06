@@ -1,4 +1,4 @@
-package com.holidayplanner.identityservice.model;
+package com.holidayplanner.shared.model;
 
 import jakarta.persistence.*;
 import lombok.Getter;

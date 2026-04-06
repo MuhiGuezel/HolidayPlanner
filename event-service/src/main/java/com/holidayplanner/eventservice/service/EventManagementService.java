@@ -1,6 +1,6 @@
 package com.holidayplanner.eventservice.service;
 
-import com.holidayplanner.eventservice.model.*;
+import com.holidayplanner.shared.model.*;
 import com.holidayplanner.eventservice.repository.EventRepository;
 import com.holidayplanner.eventservice.repository.EventTermRepository;
 import com.holidayplanner.eventservice.repository.RemarkRepository;

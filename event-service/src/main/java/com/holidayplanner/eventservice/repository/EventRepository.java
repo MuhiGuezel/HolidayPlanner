@@ -1,6 +1,6 @@
 package com.holidayplanner.eventservice.repository;
 
-import com.holidayplanner.eventservice.model.Event;
+import com.holidayplanner.shared.model.Event;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.stereotype.Repository;
 

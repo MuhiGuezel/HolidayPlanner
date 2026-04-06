@@ -1,4 +1,4 @@
-package com.holidayplanner.notificationservice.model;
+package com.holidayplanner.shared.model;
 
 import lombok.AllArgsConstructor;
 import lombok.Data;

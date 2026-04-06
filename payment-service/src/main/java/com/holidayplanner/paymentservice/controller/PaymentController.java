@@ -1,6 +1,6 @@
 package com.holidayplanner.paymentservice.controller;
 
-import com.holidayplanner.paymentservice.model.Payment;
+import com.holidayplanner.shared.model.Payment;
 import com.holidayplanner.paymentservice.service.PaymentService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.ResponseEntity;

@@ -1,7 +1,7 @@
 package com.holidayplanner.paymentservice.repository;
 
-import com.holidayplanner.paymentservice.model.Payment;
-import com.holidayplanner.paymentservice.model.PaymentStatus;
+import com.holidayplanner.shared.model.Payment;
+import com.holidayplanner.shared.model.PaymentStatus;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.stereotype.Repository;
 

@@ -1,6 +1,6 @@
 package com.holidayplanner.identityservice.repository;
 
-import com.holidayplanner.identityservice.model.User;
+import com.holidayplanner.shared.model.User;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.stereotype.Repository;
 

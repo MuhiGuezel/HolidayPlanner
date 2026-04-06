@@ -1,27 +1,30 @@
-package com.holidayplanner.identityservice.model;
+package com.holidayplanner.shared.model;
 
 import jakarta.persistence.*;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.Setter;
 
-import java.time.LocalDate;
 import java.util.UUID;
 
 @Entity
-@Table(name = "family_members")
+@Table(name = "team_members")
 @Getter
 @Setter
 @NoArgsConstructor
-public class FamilyMember {
+public class TeamMember {
 
     @Id
     @GeneratedValue(strategy = GenerationType.UUID)
     private UUID id;
 
     @ManyToOne(fetch = FetchType.LAZY)
-    @JoinColumn(name = "user_id", nullable = false)
-    private User user;
+    @JoinColumn(name = "organization_id", nullable = false)
+    private Organization organization;
+
+    // Reference to User in IdentityService
+    @Column(nullable = false)
+    private UUID userId;
 
     @Column(nullable = false)
     private String firstName;
@@ -30,8 +33,9 @@ public class FamilyMember {
     private String lastName;
 
     @Column(nullable = false)
-    private LocalDate birthDate;
+    private String email;
 
+    @Enumerated(EnumType.STRING)
     @Column(nullable = false)
-    private String zip;
+    private TeamMemberRole role = TeamMemberRole.TEAM_MEMBER;
 }
