@@ -1,0 +1,65 @@
+package com.holidayplanner.bookletservice.controller;
+
+import com.holidayplanner.bookletservice.service.BookletService;
+import lombok.RequiredArgsConstructor;
+import org.springframework.http.HttpHeaders;
+import org.springframework.http.MediaType;
+import org.springframework.http.ResponseEntity;
+import org.springframework.web.bind.annotation.*;
+
+import java.io.IOException;
+import java.util.List;
+
+@RestController
+@RequestMapping("/api/booklets")
+@RequiredArgsConstructor
+public class BookletController {
+
+    private final BookletService bookletService;
+
+    @GetMapping("/health")
+    public ResponseEntity<String> health() {
+        return ResponseEntity.ok("BookletService is running!");
+    }
+
+    // Generate full organization booklet as PDF download
+    @PostMapping("/organization")
+    public ResponseEntity<byte[]> generateBooklet(
+            @RequestParam String organizationName,
+            @RequestParam String contactInfo,
+            @RequestBody GenerateBookletRequest request) throws IOException {
+
+        byte[] pdf = bookletService.generateBooklet(
+                organizationName, contactInfo,
+                request.getEventSummaries(), request.getSponsorNames());
+
+        return ResponseEntity.ok()
+                .header(HttpHeaders.CONTENT_DISPOSITION,
+                        "attachment; filename=\"booklet-" + organizationName + ".pdf\"")
+                .contentType(MediaType.APPLICATION_PDF)
+                .body(pdf);
+    }
+
+    // Generate participant list PDF for caregiver
+    @PostMapping("/participant-list")
+    public ResponseEntity<byte[]> generateParticipantList(
+            @RequestParam String eventName,
+            @RequestParam String termDate,
+            @RequestBody List<String> participantNames) throws IOException {
+
+        byte[] pdf = bookletService.generateParticipantListPdf(eventName, termDate, participantNames);
+
+        return ResponseEntity.ok()
+                .header(HttpHeaders.CONTENT_DISPOSITION,
+                        "attachment; filename=\"participants-" + eventName + ".pdf\"")
+                .contentType(MediaType.APPLICATION_PDF)
+                .body(pdf);
+    }
+
+    // Inner request class
+    @lombok.Data
+    public static class GenerateBookletRequest {
+        private List<String> eventSummaries;
+        private List<String> sponsorNames;
+    }
+}

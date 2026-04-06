@@ -1,0 +1,6 @@
+spring:
+  application:
+    name: booklet-service
+
+server:
+  port: 8087
