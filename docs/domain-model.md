@@ -2,7 +2,7 @@
 
 This document describes the domain model for the Holiday Planner system.
 
-> The UML diagram image (`domain-model.png`) should be placed in this folder alongside this file.
+![Holiday Planner domain model](./DomainModel.svg)
 
 ---
 
@@ -12,7 +12,7 @@ This document describes the domain model for the Holiday Planner system.
 
 - **Admin** sits entirely outside any organization. Their only job is to create and manage municipal organizations.
 - **Organization** is the central hub for a municipality or region. All staff, finances, and events belong to an organization. It holds high-level settings like `bankAccount` and `bookingStartTime`.
-- **OrganizationTeamMember** manages day-to-day operations for a specific organization. A team member belongs to exactly one organization.
+- **OrganizationTeamMember** manages day-to-day operations for a specific organization.
 
 ---
 
@@ -70,7 +70,7 @@ This is the most critical design pattern in the system:
 - There is **no separate WaitingList class**. The waitlist operates on a First-In-First-Out (FIFO) basis using the `WAITLISTED` booking status.
 - When a confirmed booking is cancelled or max participants is increased, the first `WAITLISTED` booking is automatically promoted to `CONFIRMED`.
 
-- **Remark** allows Event Owners to write internal notes about a participant's behaviour. Remarks are linked to the `EventOwner` who wrote it and the `FamilyMember` it describes. They are hidden from parents and visible to all event owners.
+- **Remark** allows Event Owners to write internal notes about a participant's behaviour. Remarks are linked to the `EventOwner` who wrote it and the `FamilyMember` it describes.
 
 ---
 
@@ -81,7 +81,7 @@ This is the most critical design pattern in the system:
 | `Organization` | — | `name`, `bankAccount`, `bookingStartTime` |
 | `TeamMember` | Organization | `userId`, `firstName`, `lastName`, `email`, `role` |
 | `Sponsor` | Organization | `name`, `amount` |
-| `Event` | Organization | `shortTitle`, `description`, `location`, `price`, `minAge`, `maxAge` |
+| `Event` | Organization | `shortTitle`, `description`, `location`, `price`, `minimalAge`, `maximalAge` |
 | `EventTerm` | Event | `startDateTime`, `endDateTime`, `minParticipants`, `maxParticipants`, `status` |
 | `Caregiver` | EventTerm | `firstName`, `lastName`, `email`, `phoneNumber` |
 | `User` | Organization | `email`, `phoneNumber`, `passwordHash` |

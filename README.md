@@ -22,15 +22,15 @@ A web application that provides a platform where municipalities can offer events
 
 ## Services
 
-| Service | Responsibility | Port | Branch |
-|---|---|---|---|
-| `IdentityService` | User auth, registration, sessions, caregiver management | 8083 | `feature/identity-service` |
-| `EventService` | Events, event terms, status lifecycle, remarks, caregiver assignment | 8081 | `feature/event-service` |
-| `BookingService` | Bookings, waiting list, cancellations, participant management | 8082 | `feature/booking-service` |
-| `OrganizationService` | Organizations, team members, bank account, booking start time, sponsors | 8084 | `feature/organization-service` |
-| `PaymentService` | Payment tracking, refunds, sponsor payments, balance sheet | 8085 | `feature/payment-service` |
-| `NotificationService` | Email notifications (booking confirmed, term cancelled, bulk messaging) | 8086 | `feature/notification-service` |
-| `BookletService` | PDF generation of the event booklet per organization | 8087 | `feature/booklet-service` |
+| Service | Responsibility |
+|---|---|
+| `IdentityService` | User auth, registration, sessions, caregiver management |
+| `EventService` | Events, event terms, status lifecycle, remarks, caregiver assignment |
+| `BookingService` | Bookings, waiting list, cancellations, participant management |
+| `OrganizationService` | Organizations, team members, bank account, booking start time, sponsors |
+| `PaymentService` | Payment tracking, refunds, sponsor payments, balance sheet |
+| `NotificationService` | Email notifications (booking confirmed, term cancelled, bulk messaging) |
+| `BookletService` | PDF generation of the event booklet per organization |
 
 ---
 
@@ -38,9 +38,7 @@ A web application that provides a platform where municipalities can offer events
 
 **Main Repository:** [https://github.com/MuhiGuezel/HolidayPlanner](https://github.com/MuhiGuezel/HolidayPlanner)
 
-Each service is developed on its own branch. All services are shipped as Docker images.
-
-> Repository access has been granted to: `friessnegger` and `frimp73`
+The repository is organized as a Maven multi-module monorepo on `main`. Each service is its own Spring Boot application, and the shared model classes live in the `shared` module.
 
 ---
 
@@ -60,7 +58,7 @@ All services are implemented using **Java 21** with **Spring Boot 3.2.4**.
 **PostgreSQL** — each service owns its own database schema (no shared DB between services).
 
 ### Build Tool
-**Maven** — consistent across all services for easier cross-team support.
+**Maven** — the repository uses a root aggregator/parent `pom.xml` with one module per service plus a shared library module.
 
 ### PDF Generation
 **Apache PDFBox** (BookletService) — open source, no licensing restrictions.
@@ -77,12 +75,14 @@ All services are implemented using **Java 21** with **Spring Boot 3.2.4**.
 
 ```
 HolidayPlanner/
+├── pom.xml
 ├── README.md
 ├── docker-compose.yml          ← to be provided by course team
 ├── docs/
 │   ├── domain-model.md         ← domain model description
-│   ├── domain-model.png        ← domain model UML diagram
+│   ├── DomainModel.svg         ← domain model UML diagram
 │   └── system-operations.md   ← full system operations table
+├── shared/
 ├── identity-service/
 ├── event-service/
 ├── booking-service/
@@ -102,13 +102,17 @@ HolidayPlanner/
 - Docker
 - PostgreSQL (for local development)
 
-### Build a single service
+### Build the full monorepo
 ```bash
-cd <service-name>
-mvn clean package -DskipTests
+mvn clean install
 ```
 
-### Run locally
+### Build a single service
+```bash
+mvn -pl <service-name> -am clean package -DskipTests
+```
+
+### Run a single service locally
 ```bash
 cd <service-name>
 mvn spring-boot:run
@@ -116,7 +120,6 @@ mvn spring-boot:run
 
 ### Run tests
 ```bash
-cd <service-name>
 mvn test
 ```
 
@@ -150,7 +153,7 @@ docker-compose up
 
 ## Configuration
 
-Each service is configured via environment variables. Defaults are set for local development in `application.yml`.
+Each service is configured via environment variables. Defaults are set for local development in each module's `application.yml`.
 
 ### Common variables (all services except NotificationService and BookletService)
 
@@ -176,11 +179,10 @@ Each service is configured via environment variables. Defaults are set for local
 ## What Has Been Prepared
 
 - [x] Team formed and service responsibilities assigned
-- [x] GitHub repository created and all branches set up
+- [x] GitHub repository created
 - [x] Technology stack decided (Java 21 + Spring Boot 3.2.4)
-- [x] All 7 services bootstrapped with hello world REST endpoint
-- [x] First model classes added per service
-- [x] Basic system operations implemented per service
+- [x] Services bootstrapped
+- [x] Maven multi-module parent/aggregator at the repository root
 - [x] Dockerfile added per service (multi-stage build)
 - [x] Database configuration per service (PostgreSQL via env variables)
 - [x] Domain model documented in `docs/`
