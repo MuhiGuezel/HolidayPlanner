@@ -1,6 +1,7 @@
 package com.holidayplanner.eventservice.controller;
 
 import com.holidayplanner.shared.model.*;
+import com.holidayplanner.eventservice.dto.EventTermResponse;
 import com.holidayplanner.eventservice.service.EventManagementService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.ResponseEntity;
@@ -18,88 +19,85 @@ public class EventController {
 
     private final EventManagementService eventManagementService;
 
-    // Hello World endpoint
     @GetMapping("/health")
     public ResponseEntity<String> health() {
         return ResponseEntity.ok("EventService is running!");
     }
 
-    // Get all events for an organization
+    @GetMapping("/terms/{eventTermId}")
+    public ResponseEntity<EventTermResponse> getEventTerm(@PathVariable("eventTermId") UUID eventTermId) {
+        EventTerm term = eventManagementService.verifyEventTerm(eventTermId);
+        return ResponseEntity.ok(EventTermResponse.from(term));
+    }
+
     @GetMapping("/organization/{organizationId}")
-    public ResponseEntity<List<Event>> getEventsByOrganization(@PathVariable UUID organizationId) {
+    public ResponseEntity<List<Event>> getEventsByOrganization(@PathVariable("organizationId") UUID organizationId) {
         return ResponseEntity.ok(eventManagementService.getEventsByOrganization(organizationId));
     }
 
-    // Update an event
     @PutMapping("/{eventId}")
     public ResponseEntity<Event> updateEvent(
-            @PathVariable UUID eventId,
-            @RequestParam String shortTitle,
-            @RequestParam String description,
-            @RequestParam String location,
-            @RequestParam(required = false) String meetingPoint,
-            @RequestParam(required = false) BigDecimal price,
-            @RequestParam(required = false) PaymentMethod paymentMethod,
-            @RequestParam int minimalAge,
-            @RequestParam int maximalAge,
-            @RequestParam(required = false) String pictureUrl) {
+            @PathVariable("eventId") UUID eventId,
+            @RequestParam("shortTitle") String shortTitle,
+            @RequestParam("description") String description,
+            @RequestParam("location") String location,
+            @RequestParam(value = "meetingPoint", required = false) String meetingPoint,
+            @RequestParam(value = "price", required = false) BigDecimal price,
+            @RequestParam(value = "paymentMethod", required = false) PaymentMethod paymentMethod,
+            @RequestParam("minimalAge") int minimalAge,
+            @RequestParam("maximalAge") int maximalAge,
+            @RequestParam(value = "pictureUrl", required = false) String pictureUrl) {
         return ResponseEntity.ok(eventManagementService.updateEvent(
                 eventId, shortTitle, description, location, meetingPoint,
                 price, paymentMethod, minimalAge, maximalAge, pictureUrl));
     }
 
-    // Create an event term
     @PostMapping("/{eventId}/terms")
     public ResponseEntity<EventTerm> createEventTerm(
-            @PathVariable UUID eventId,
-            @RequestParam LocalDateTime startDateTime,
-            @RequestParam LocalDateTime endDateTime,
-            @RequestParam int minParticipants,
-            @RequestParam int maxParticipants) {
+            @PathVariable("eventId") UUID eventId,
+            @RequestParam("startDateTime") LocalDateTime startDateTime,
+            @RequestParam("endDateTime") LocalDateTime endDateTime,
+            @RequestParam("minParticipants") int minParticipants,
+            @RequestParam("maxParticipants") int maxParticipants) {
         return ResponseEntity.ok(eventManagementService.createEventTerm(
                 eventId, startDateTime, endDateTime, minParticipants, maxParticipants));
     }
 
-    // Change event term status
     @PatchMapping("/terms/{eventTermId}/status")
     public ResponseEntity<EventTerm> changeEventTermStatus(
-            @PathVariable UUID eventTermId,
-            @RequestParam EventTermStatus newStatus) {
+            @PathVariable("eventTermId") UUID eventTermId,
+            @RequestParam("newStatus") EventTermStatus newStatus) {
         return ResponseEntity.ok(eventManagementService.changeEventTermStatus(eventTermId, newStatus));
     }
 
-    // Update event term capacity
     @PatchMapping("/terms/{eventTermId}/capacity")
     public ResponseEntity<EventTerm> updateEventTermCapacity(
-            @PathVariable UUID eventTermId,
-            @RequestParam int minParticipants,
-            @RequestParam int maxParticipants) {
+            @PathVariable("eventTermId") UUID eventTermId,
+            @RequestParam("minParticipants") int minParticipants,
+            @RequestParam("maxParticipants") int maxParticipants) {
         return ResponseEntity.ok(eventManagementService.updateEventTermCapacity(
                 eventTermId, minParticipants, maxParticipants));
     }
 
-    // Assign caregiver to event term
     @PostMapping("/terms/{eventTermId}/caregivers/{caregiverId}")
     public ResponseEntity<EventTerm> assignCaregiver(
-            @PathVariable UUID eventTermId,
-            @PathVariable UUID caregiverId) {
+            @PathVariable("eventTermId") UUID eventTermId,
+            @PathVariable("caregiverId") UUID caregiverId) {
         return ResponseEntity.ok(eventManagementService.assignCaregiverToEventTerm(eventTermId, caregiverId));
     }
 
-    // Create a remark
     @PostMapping("/terms/{eventTermId}/remarks")
     public ResponseEntity<Remark> createRemark(
-            @PathVariable UUID eventTermId,
-            @RequestParam UUID familyMemberId,
-            @RequestParam UUID eventOwnerId,
-            @RequestParam String description) {
+            @PathVariable("eventTermId") UUID eventTermId,
+            @RequestParam("familyMemberId") UUID familyMemberId,
+            @RequestParam("eventOwnerId") UUID eventOwnerId,
+            @RequestParam("description") String description) {
         return ResponseEntity.ok(eventManagementService.createRemark(
                 eventTermId, familyMemberId, eventOwnerId, description));
     }
 
-    // Get remarks for an event term
     @GetMapping("/terms/{eventTermId}/remarks")
-    public ResponseEntity<List<Remark>> getRemarks(@PathVariable UUID eventTermId) {
+    public ResponseEntity<List<Remark>> getRemarks(@PathVariable("eventTermId") UUID eventTermId) {
         return ResponseEntity.ok(eventManagementService.getRemarks(eventTermId));
     }
 }
