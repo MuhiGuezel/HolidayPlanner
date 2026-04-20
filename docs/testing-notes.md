@@ -1,120 +1,56 @@
-## 1. Was wurde getestet?
+## 1. What was tested?
 
-Der Hauptanwendungsfall von booking-service: **`createBooking`**
+Main use case of booking-service: **`createBooking`**
 
-Ein User bucht einen EventTerm für ein FamilyMember. Das System entscheidet ob die Buchung **CONFIRMED** (Platz frei) oder **WAITLISTED** (ausgebucht) wird.
+A user books an EventTerm for a FamilyMember. The system decides if the booking is **CONFIRMED** (spot available) or **WAITLISTED** (fully booked).
 
-### Testebenen
-
-| Ebene | Klasse | Zweck |
+| Level | Class | Purpose |
 |---|---|---|
-| **Unit Test** | `BookingServiceUnitTest` | Reine Business-Logik, alle Abhängigkeiten gemockt |
-| **Integration Test** | `BookingServiceIntegrationTest` | Service + echte H2-Datenbank + gemockter IPC |
-| **Component Test** | `BookingControllerComponentTest` | Kompletter HTTP-Stack als Black Box |
-| **Contract Test (Provider)** | `BookingProviderContractTest` | API-Shape die booking-service nach außen liefert |
-| **Contract Test (Consumer)** | `EventServiceConsumerContractTest` | Wie booking-service auf event-service antwortet |
+| Unit Test | `BookingServiceUnitTest` | Business logic only, all dependencies mocked |
+| Integration Test | `BookingServiceIntegrationTest` | Service + real H2 database + mocked IPC |
+| Component Test | `BookingControllerComponentTest` | Full HTTP stack as black box |
+| Contract Test (Provider) | `BookingProviderContractTest` | API shape that booking-service exposes |
+| Contract Test (Consumer) | `EventServiceConsumerContractTest` | How booking-service consumes event-service |
 
 ---
 
-## 2. Wie wurden Contracts getestet?
+## 2. How were contracts tested?
 
-### Das Problem
+booking-service calls `GET /api/events/terms/{id}` on event-service. If event-service renames `maxParticipants` to `capacity`, booking-service silently breaks — no compile error.
 
-booking-service kommuniziert mit event-service via HTTP:
-- booking-service ruft `GET /api/events/terms/{id}` auf
-- event-service antwortet mit `{ "status": "ACTIVE", "maxParticipants": 20, ... }`
+**Provider-side** (`BookingProviderContractTest`): verifies that booking-service always returns the expected fields (`id`, `status`, `familyMemberId`, `bookedAt`). If a field is renamed or removed, the test fails.
 
-Wenn event-service das Feld `maxParticipants` umbenennt (z.B. in `capacity`), bricht booking-service — **ohne Compilerfehler, ohne sofortige Warnung**.
+**Consumer-side** (`EventServiceConsumerContractTest`): WireMock simulates event-service with the agreed response shape. Verifies that booking-service correctly parses the response. If event-service changes the field name, the parser returns 0 instead of 20 — the test fails.
 
-### Lösung: Zwei Seiten des Contracts
-
-#### Provider-Side Contract (`BookingProviderContractTest`)
-booking-service ist hier der **Provider** (liefert API an andere Services).  
-Der Test verifiziert, dass die Antwort immer exakt die erwarteten Felder enthält:
-
-```java
-mockMvc.perform(post("/api/bookings")...)
-    .andExpect(jsonPath("$.id").isString())
-    .andExpect(jsonPath("$.status").isString())
-    .andExpect(jsonPath("$.familyMemberId").exists())
-    .andExpect(jsonPath("$.bookedAt").isString());
-```
-
-→ Wenn jemand `bookedAt` umbenennt oder entfernt, schlägt dieser Test sofort fehl.
-
-#### Consumer-Side Contract (`EventServiceConsumerContractTest`)
-booking-service ist hier der **Consumer** (ruft event-service auf).  
-WireMock simuliert event-service mit dem vereinbarten Response-Shape:
-
-```java
-wm.stubFor(get("/api/event-terms/" + id)
-    .willReturn(okJson("""
-        { "status": "ACTIVE", "maxParticipants": 20 }
-    """)));
-
-EventTermDetails details = eventServiceClient.getEventTerm(id);
-assertThat(details.getMaxParticipants()).isEqualTo(20);
-```
-
-→ Wenn event-service `maxParticipants` zu `capacity` umbenennt, parst `EventTermDetails` 0 statt 20 — der Test schlägt fehl.
-
-### Wie werden andere Teams informiert?
-
-**Aktuell (manuell):** Die Contract Tests dokumentieren die erwartete API-Shape.  
-Wenn event-service-Team die API ändert, müssen sie `EventServiceConsumerContractTest` in booking-service prüfen.
-
-**Besser (automatisch, nicht implementiert):**  
-Mit **Spring Cloud Contract** oder **Pact** würde das so funktionieren:
-1. booking-service publiziert seinen Consumer-Contract als Datei
-2. event-service lädt diesen Contract und führt ihn als Provider-Test aus
-3. Falls event-service die API bricht → CI schlägt beim event-service-Build fehl, **bevor** der Code gemergt wird
+**Limitation:** WireMock always returns the stubbed response, so if event-service actually changes its API, our tests still pass. This is a parsing test, not a true contract test. A real solution would be **Pact** or **Spring Cloud Contract**, where event-service runs our consumer contract as a provider test.
 
 ---
 
-## 3. Findings / Erkenntnisse
+## 3. Findings
 
-### Security-Problem gefunden
-Das ursprüngliche `createBooking` akzeptierte `maxParticipants` als Query-Parameter vom Client:
-```
-POST /api/bookings?maxParticipants=9999
-```
-→ Jeder User konnte die Kapazität selbst setzen.  
-**Fix:** Parameter entfernt — booking-service holt die Kapazität direkt von event-service.
+**Security fix:** The original `createBooking` accepted `maxParticipants` as a query parameter from the client — any user could set the capacity themselves. Fixed by removing the parameter; booking-service now fetches capacity directly from event-service.
 
-### @PrePersist wird in Unit Tests nicht ausgeführt
-`Booking.bookedAt` wird per `@PrePersist` gesetzt (beim JPA-Persist).  
-In Unit Tests mit gemocktem Repository passiert kein echter JPA-Persist → `bookedAt` bleibt null.  
-→ `@PrePersist` Verhalten nur in Integration Tests testbar (mit echter DB).
+**`@PrePersist` not triggered in unit tests:** `Booking.bookedAt` is set via `@PrePersist`. In unit tests with a mocked repository, no real JPA persist happens → `bookedAt` stays null. Only testable in integration tests with a real DB.
 
-### Partial Response funktioniert
-Wenn event-service nur die Pflichtfelder schickt (kein `startDate`, kein `eventId`), crasht booking-service nicht.  
-Jackson ignoriert fehlende Felder standardmäßig.  
-→ Explizit als Testfall dokumentiert: `createBooking_whenEventServiceReturnsPartialResponse_stillPersists`
+**Partial response works:** If event-service only returns the required fields (no `startDate`, no `eventId`), booking-service does not crash. Jackson ignores missing fields by default.
 
-### Kein `@Transactional` auf `cancelBooking`
-`cancelBooking` macht 2 DB-Writes (Cancel + Promote).  
-Wenn der zweite Write fehlschlägt, ist die Buchung gecancelt aber niemand wird promoted → inkonsistenter Zustand.  
-→ Offen: `@Transactional` auf `cancelBooking` ergänzen.
-
-### Race Condition bei cancelBooking
-Zwei gleichzeitige Cancel-Requests könnten denselben Waitlisted-Booking promoten.  
-→ Offen: `@Transactional` + Optimistic Locking oder `SELECT FOR UPDATE`.
+**Missing `@Transactional` on `cancelBooking`:** `cancelBooking` does 2 DB writes (cancel + promote). If the second write fails, the booking is cancelled but nobody gets promoted → inconsistent state. Open: add `@Transactional`.
 
 ---
 
-## 4. Fragen für die Vorlesung
+## 4. Questions
 
-**Q1 — Contract Testing ohne Framework:**  
-Unsere Consumer-Contract-Tests mit WireMock prüfen nur dass *wir* die Response korrekt parsen. Aber wenn event-service seine API ändert, laufen unsere Tests trotzdem grün (weil WireMock die alte Response liefert). Ist das noch ein "echter" Contract Test, oder nur ein Parsing-Test?
+**Q1 — Contract testing without a framework:**
+Our consumer contract tests with WireMock only verify that *we* parse the response correctly. If event-service changes its API, our tests still pass (WireMock returns the old response). Is this still a contract test, or just a parsing test?
 
-**Q2 — Wann Choreography vs. Orchestration?**  
-Beim `cancelBooking`-Flow: booking-service cancelt, promoted, und müsste eigentlich auch NotificationService und PaymentService informieren. Ist hier Choreography (Events) besser als direkte Calls? Ab wann lohnt sich der Overhead einer Message Queue?
+**Q2 — Choreography vs. Orchestration:**
+`cancelBooking` should also notify a payment service and a notification service. Is choreography (events/message queue) better here than direct calls? When is the overhead of a message queue worth it?
 
-**Q3 — Integration Test mit H2 vs. echter PostgreSQL:**  
-H2 und PostgreSQL verhalten sich in manchen Fällen unterschiedlich (z.B. UUID-Generierung, bestimmte SQL-Funktionen). Wie zuverlässig sind unsere Integration Tests mit H2, wenn Produktion auf PostgreSQL läuft? Wann braucht man Testcontainers?
+**Q3 — H2 vs. real PostgreSQL:**
+H2 and PostgreSQL behave differently in some cases (UUID generation, specific SQL functions). How reliable are our integration tests with H2 when production runs on PostgreSQL? When do you need Testcontainers?
 
-**Q4 — Timeout-Handling:**  
-Im Consumer-Contract-Test konfigurieren wir 500ms Timeout manuell auf dem RestClient. Wie sollte das in einem produktiven System konfiguriert werden? Pro Service? Global? Über einen Circuit Breaker (Resilience4j)?
+**Q4 — Timeout configuration:**
+We set 500ms timeout manually on the RestClient in the consumer contract test. How should this be configured in a production system — per service or globally?
 
-**Q5 — IPC Security:**  
-Aktuell gibt es keine Authentifizierung zwischen Services (booking-service ruft event-service ohne Token auf). Wie würde man Service-to-Service Authentication in Spring Boot umsetzen? JWT mit shared secret, mTLS, oder OAuth2 Client Credentials?
+**Q5 — IPC Security:**
+There is currently no authentication between services (booking-service calls event-service without a token). How would you implement service-to-service authentication in Spring Boot — JWT with shared secret, mTLS, or OAuth2 Client Credentials?
