@@ -1,5 +1,8 @@
 package com.holidayplanner.bookingservice.service;
 
+import com.holidayplanner.bookingservice.client.EventServiceClient;
+import com.holidayplanner.bookingservice.client.EventTermDetails;
+import com.holidayplanner.bookingservice.exception.BookingNotFoundException;
 import com.holidayplanner.shared.model.Booking;
 import com.holidayplanner.shared.model.BookingStatus;
 import com.holidayplanner.bookingservice.repository.BookingRepository;
@@ -14,31 +17,42 @@ import java.util.UUID;
 public class BookingService {
 
     private final BookingRepository bookingRepository;
+    private final EventServiceClient eventServiceClient;
 
     public List<Booking> getBookingsForEventTerm(UUID eventTermId) {
         return bookingRepository.findByEventTermId(eventTermId);
     }
 
-    public Booking createBooking(UUID familyMemberId, UUID eventTermId, long maxParticipants) {
+    public Booking createBooking(UUID familyMemberId, UUID eventTermId) {
+        EventTermDetails eventTerm = eventServiceClient.getEventTerm(eventTermId);
+
+        if (!"ACTIVE".equals(eventTerm.getStatus())) {
+            throw new IllegalStateException("Event term is not active: " + eventTermId);
+        }
+
         long confirmedCount = bookingRepository.countByEventTermIdAndStatus(eventTermId, BookingStatus.CONFIRMED);
 
         Booking booking = new Booking();
         booking.setFamilyMemberId(familyMemberId);
         booking.setEventTermId(eventTermId);
-        booking.setStatus(confirmedCount < maxParticipants ? BookingStatus.CONFIRMED : BookingStatus.WAITLISTED);
+        booking.setStatus(confirmedCount < eventTerm.getMaxParticipants()
+                ? BookingStatus.CONFIRMED
+                : BookingStatus.WAITLISTED);
 
         return bookingRepository.save(booking);
     }
 
     public Booking cancelBooking(UUID bookingId) {
         Booking booking = bookingRepository.findById(bookingId)
-                .orElseThrow(() -> new RuntimeException("Booking not found: " + bookingId));
+                .orElseThrow(() -> new BookingNotFoundException(bookingId));
 
         booking.setStatus(BookingStatus.CANCELLED);
         bookingRepository.save(booking);
 
-        // Promote first waitlisted booking to confirmed
-        promoteFromWaitingList(booking.getEventTermId(), 1);
+        UUID eventTermId = booking.getEventTermId();
+        if (eventTermId != null) {
+            promoteFromWaitingList(eventTermId, 1);
+        }
 
         return booking;
     }

@@ -1,0 +1,149 @@
+services:
+
+  # ── Infrastructure ──────────────────────────────────────────────────────────
+
+  postgres:
+    image: postgres:15
+    container_name: holidayplanner-db
+    environment:
+      POSTGRES_USER: postgres
+      POSTGRES_PASSWORD: postgres
+      POSTGRES_DB: postgres
+    ports:
+      - "5432:5432"
+    volumes:
+      - postgres_data:/var/lib/postgresql/data
+      - ./docker/init-databases.sh:/docker-entrypoint-initdb.d/init-databases.sh
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U postgres"]
+      interval: 5s
+      timeout: 5s
+      retries: 5
+
+  kafka:
+    image: public.ecr.aws/bitnami/kafka:4.2.0
+    deploy:
+      resources:
+        limits:
+          pids: 1024
+    volumes:
+      - kafka_data:/bitnami/kafka
+    user: "0"
+    ports:
+      - "9092:9092"
+    environment:
+      BITNAMI_DEBUG: "true"
+      KAFKA_CFG_PROCESS_ROLES: broker,controller
+      KAFKA_CFG_NODE_ID: 1
+      KAFKA_KRAFT_CLUSTER_ID: 6L8XGfS3T9Wj4e1_L-5_pQ
+      KAFKA_CFG_CONTROLLER_QUORUM_BOOTSTRAP_SERVERS: kafka:29093
+      KAFKA_INITIAL_CONTROLLERS: 1@kafka:29093:6L8XGfS3T9Wj4e1_L-5_pQ
+      KAFKA_CFG_LISTENERS: DOCKER://kafka:29092,CONTROLLER://kafka:29093,HOST://0.0.0.0:9092
+      KAFKA_CFG_ADVERTISED_LISTENERS: DOCKER://kafka:29092,HOST://localhost:9092
+      KAFKA_CFG_LISTENER_SECURITY_PROTOCOL_MAP: CONTROLLER:PLAINTEXT,DOCKER:PLAINTEXT,HOST:PLAINTEXT
+      KAFKA_CFG_INTER_BROKER_LISTENER_NAME: DOCKER
+      KAFKA_CFG_CONTROLLER_LISTENER_NAMES: CONTROLLER
+      ALLOW_PLAINTEXT_LISTENER: "yes"
+      KAFKA_CFG_COMPRESSION_TYPE: gzip
+      KAFKA_CFG_LOG_RETENTION_MS: -1
+      KAFKA_CFG_LOG_RETENTION_BYTES: -1
+      KAFKA_CFG_MESSAGE_TIMESTAMP_TYPE: CreateTime
+      KAFKA_CFG_DELETE_TOPIC_ENABLE: "true"
+      KAFKA_CFG_AUTO_CREATE_TOPICS_ENABLE: "true"
+      KAFKA_CFG_TRANSACTION_STATE_LOG_REPLICATION_FACTOR: 1
+      KAFKA_CFG_TRANSACTION_STATE_LOG_MIN_ISR: 1
+      KAFKA_CFG_OFFSETS_TOPIC_REPLICATION_FACTOR: 1
+      KAFKA_CFG_GROUP_INITIAL_REBALANCE_DELAY_MS: 0
+
+  kafkaui:
+    image: docker.redpanda.com/redpandadata/console:v3.7.1
+    ports:
+      - "5000:5000"
+    environment:
+      KAFKA_BROKERS: kafka:29092
+      SERVER_LISTENPORT: "5000"
+    depends_on:
+      - kafka
+
+  # ── Services ─────────────────────────────────────────────────────────────────
+
+  event-service:
+    image: ghcr.io/muhiguezel/holidayplanner-event-service:latest
+    ports:
+      - "8081:8081"
+    volumes:
+      - ./docker/application-event.yml:/app/config/application-docker.yml
+    environment:
+      SPRING_CONFIG_ADDITIONAL_LOCATION: /app/config/application-docker.yml
+    depends_on:
+      postgres:
+        condition: service_healthy
+
+  booking-service:
+    image: ghcr.io/muhiguezel/holidayplanner-booking-service:latest
+    ports:
+      - "8082:8082"
+    volumes:
+      - ./docker/application-booking.yml:/app/config/application-docker.yml
+    environment:
+      SPRING_CONFIG_ADDITIONAL_LOCATION: /app/config/application-docker.yml
+    depends_on:
+      postgres:
+        condition: service_healthy
+      event-service:
+        condition: service_started
+
+  identity-service:
+    image: ghcr.io/muhiguezel/holidayplanner-identity-service:latest
+    ports:
+      - "8083:8083"
+    volumes:
+      - ./docker/application-identity.yml:/app/config/application-docker.yml
+    environment:
+      SPRING_CONFIG_ADDITIONAL_LOCATION: /app/config/application-docker.yml
+    depends_on:
+      postgres:
+        condition: service_healthy
+
+  organization-service:
+    image: ghcr.io/muhiguezel/holidayplanner-organization-service:latest
+    ports:
+      - "8084:8084"
+    volumes:
+      - ./docker/application-organization.yml:/app/config/application-docker.yml
+    environment:
+      SPRING_CONFIG_ADDITIONAL_LOCATION: /app/config/application-docker.yml
+    depends_on:
+      postgres:
+        condition: service_healthy
+
+  payment-service:
+    image: ghcr.io/muhiguezel/holidayplanner-payment-service:latest
+    ports:
+      - "8085:8085"
+    volumes:
+      - ./docker/application-payment.yml:/app/config/application-docker.yml
+    environment:
+      SPRING_CONFIG_ADDITIONAL_LOCATION: /app/config/application-docker.yml
+    depends_on:
+      postgres:
+        condition: service_healthy
+
+  notification-service:
+    image: ghcr.io/muhiguezel/holidayplanner-notification-service:latest
+    ports:
+      - "8086:8086"
+    environment:
+      MAIL_HOST: ${MAIL_HOST:-smtp.gmail.com}
+      MAIL_PORT: ${MAIL_PORT:-587}
+      MAIL_USERNAME: ${MAIL_USERNAME:-}
+      MAIL_PASSWORD: ${MAIL_PASSWORD:-}
+
+  booklet-service:
+    image: ghcr.io/muhiguezel/holidayplanner-booklet-service:latest
+    ports:
+      - "8087:8087"
+
+volumes:
+  postgres_data:
+  kafka_data:
