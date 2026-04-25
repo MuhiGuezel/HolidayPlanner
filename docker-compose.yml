@@ -57,7 +57,7 @@ services:
   kafkaui:
     image: docker.redpanda.com/redpandadata/console:latest
     ports:
-      - "5000:5000"
+      - "5001:5000"
     environment:
       KAFKA_BROKERS: "kafka:29092"
       SERVER_LISTENPORT: "5000"
@@ -141,7 +141,7 @@ services:
   notification-service:
     image: muhiguezel/notification-service:latest
     ports:
-      - "8086:8086"
+      - "8090:8089"
     depends_on:
       kafka:
         condition: service_started
