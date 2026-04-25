@@ -237,3 +237,6 @@ $RECYCLE.BIN/
 *.lnk
 
 # End of https://www.toptal.com/developers/gitignore/api/java,maven,intellij,visualstudiocode,macos,windows
+
+# Docker volumes (runtime data, not source code)
+volumes/
