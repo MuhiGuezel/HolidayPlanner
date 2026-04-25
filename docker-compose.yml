@@ -53,6 +53,12 @@ services:
       KAFKA_CFG_TRANSACTION_STATE_LOG_MIN_ISR: 1
       KAFKA_CFG_OFFSETS_TOPIC_REPLICATION_FACTOR: 1
       KAFKA_CFG_GROUP_INITIAL_REBALANCE_DELAY_MS: 0
+    healthcheck:
+      test: ["CMD-SHELL", "kafka-topics.sh --bootstrap-server localhost:9092 --list"]
+      interval: 10s
+      timeout: 10s
+      retries: 10
+      start_period: 30s
 
   kafkaui:
     image: docker.redpanda.com/redpandadata/console:latest
@@ -62,7 +68,8 @@ services:
       KAFKA_BROKERS: "kafka:29092"
       SERVER_LISTENPORT: "5000"
     depends_on:
-      - kafka
+      kafka:
+        condition: service_healthy
 
   booking-service:
     image: muhiguezel/booking-service:latest
