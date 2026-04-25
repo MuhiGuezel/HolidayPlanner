@@ -4,6 +4,27 @@ A web application that provides a platform where municipalities can offer events
 
 ---
 
+## Quick Start
+
+```bash
+git clone https://github.com/MuhiGuezel/HolidayPlanner
+cd HolidayPlanner
+docker compose up -d
+```
+
+Wait ~60 seconds, then verify:
+
+```bash
+curl http://localhost:8081/actuator/health  # event-service
+curl http://localhost:8082/actuator/health  # booking-service
+curl http://localhost:8083/actuator/health  # identity-service
+curl http://localhost:8085/actuator/health  # payment-service
+```
+
+Kafka UI: http://localhost:5001
+
+---
+
 ## Team Members
 
 | Name | Service Responsibility |
