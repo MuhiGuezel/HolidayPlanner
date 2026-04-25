@@ -77,11 +77,24 @@ All services are implemented using **Java 21** with **Spring Boot 3.2.4**.
 HolidayPlanner/
 ├── pom.xml
 ├── README.md
-├── docker-compose.yml          ← to be provided by course team
+├── docker-compose.yml          ← runs all services + Kafka + Postgres
+├── create_topic.sh             ← create a Kafka topic
+├── kcat                        ← kcat wrapper (produce/consume messages)
+├── .github/workflows/
+│   └── publish.yml             ← builds & pushes images to GHCR on push to main
+├── docker/
+│   ├── init-databases.sh       ← creates all PostgreSQL databases
+│   ├── application-event.yml
+│   ├── application-booking.yml
+│   ├── application-identity.yml
+│   ├── application-organization.yml
+│   └── application-payment.yml
 ├── docs/
-│   ├── domain-model.md         ← domain model description
-│   ├── DomainModel.svg         ← domain model UML diagram
-│   └── system-operations.md   ← full system operations table
+│   ├── domain-model.md
+│   ├── DomainModel.svg
+│   ├── system-operations.md
+│   ├── messaging-conventions.md ← serialization, topic naming, envelope format
+│   └── testing-notes.md
 ├── shared/
 ├── identity-service/
 ├── event-service/
@@ -125,28 +138,35 @@ mvn test
 
 ---
 
-## 🐳 How to Deploy with Docker
+## Docker
 
-### Build a Docker image
+### Run everything locally
+
 ```bash
-cd <service-name>
-docker build -t holiday-planner/<service-name> .
+docker compose up
 ```
 
-### Run a service with Docker
+This starts: all 7 services + PostgreSQL + Kafka + Kafka UI (http://localhost:5000).
+
+Images are pulled automatically from GHCR (`ghcr.io/muhiguezel/holidayplanner-*:latest`).
+
+### Build an image manually (from the repo root)
+
 ```bash
-docker run -p <port>:<port> \
-  -e DB_HOST=localhost \
-  -e DB_PORT=5432 \
-  -e DB_NAME=<service>_db \
-  -e DB_USER=postgres \
-  -e DB_PASSWORD=postgres \
-  holiday-planner/<service-name>
+docker build -f booking-service/Dockerfile -t booking-service .
 ```
 
-### Run all services (once docker-compose is provided)
+All Dockerfiles must be built from the repo root because they depend on the `shared` module.
+
+### Publish images to GHCR
+
+Images are published automatically via GitHub Actions on every push to `main`.  
+To publish manually:
+
 ```bash
-docker-compose up
+echo $GITHUB_TOKEN | docker login ghcr.io -u MuhiGuezel --password-stdin
+docker build -f booking-service/Dockerfile -t ghcr.io/muhiguezel/holidayplanner-booking-service:latest .
+docker push ghcr.io/muhiguezel/holidayplanner-booking-service:latest
 ```
 
 ---
@@ -176,6 +196,24 @@ Each service is configured via environment variables. Defaults are set for local
 
 ---
 
+## Kafka
+
+Kafka runs on `localhost:9092`. UI at http://localhost:5000.
+
+**Create a topic:**
+```bash
+./create_topic.sh booking.booking.created
+```
+
+**Consume messages:**
+```bash
+./kcat -C -t booking.booking.created -o beginning
+```
+
+See [docs/messaging-conventions.md](docs/messaging-conventions.md) for the full topic list and message envelope format.
+
+---
+
 ## What Has Been Prepared
 
 - [x] Team formed and service responsibilities assigned
@@ -183,7 +221,10 @@ Each service is configured via environment variables. Defaults are set for local
 - [x] Technology stack decided (Java 21 + Spring Boot 3.2.4)
 - [x] Services bootstrapped
 - [x] Maven multi-module parent/aggregator at the repository root
-- [x] Dockerfile added per service (multi-stage build)
+- [x] Dockerfiles fixed for multi-module build (run from repo root)
+- [x] Images published to GHCR via GitHub Actions
+- [x] `docker-compose.yml` with all services + Kafka + PostgreSQL
+- [x] Messaging conventions defined (JSON, topic naming, envelope)
 - [x] Database configuration per service (PostgreSQL via env variables)
 - [x] Domain model documented in `docs/`
 - [x] System operations documented in `docs/`
@@ -194,3 +235,5 @@ Each service is configured via environment variables. Defaults are set for local
 
 - [Domain Model](docs/domain-model.md)
 - [System Operations](docs/system-operations.md)
+- [Messaging Conventions](docs/messaging-conventions.md)
+- [Testing Notes](docs/testing-notes.md)
