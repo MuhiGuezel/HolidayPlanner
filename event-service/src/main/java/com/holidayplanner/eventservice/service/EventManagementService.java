@@ -1,5 +1,7 @@
 package com.holidayplanner.eventservice.service;
 
+import com.holidayplanner.eventservice.kafka.EventTermEventProducer;
+import com.holidayplanner.shared.kafka.payload.EventTermCancelledPayload;
 import com.holidayplanner.shared.model.*;
 import com.holidayplanner.eventservice.repository.EventRepository;
 import com.holidayplanner.eventservice.repository.EventTermRepository;
@@ -11,6 +13,7 @@ import java.math.BigDecimal;
 import java.time.LocalDateTime;
 import java.util.List;
 import java.util.UUID;
+import java.util.stream.Collectors;
 
 @Service
 @RequiredArgsConstructor
@@ -19,6 +22,7 @@ public class EventManagementService {
     private final EventRepository eventRepository;
     private final EventTermRepository eventTermRepository;
     private final RemarkRepository remarkRepository;
+    private final EventTermEventProducer eventTermEventProducer;
 
     // --- Event Operations ---
 
@@ -70,8 +74,23 @@ public class EventManagementService {
                 .orElseThrow(() -> new RuntimeException("EventTerm not found: " + eventTermId));
 
         term.setStatus(newStatus);
-        return eventTermRepository.save(term);
-        // Note: if CANCELLED → BookingService::cancelAllBookings + NotificationService::notifyTermCancelled
+        EventTerm saved = eventTermRepository.save(term);
+
+        if (newStatus == EventTermStatus.CANCELLED) {
+            List<String> caregiverIds = term.getCaregiverIds().stream()
+                    .map(UUID::toString)
+                    .collect(Collectors.toList());
+            EventTermCancelledPayload payload = new EventTermCancelledPayload(
+                    term.getId(),
+                    term.getEvent() != null ? term.getEvent().getShortTitle() : null,
+                    term.getStartDateTime() != null ? term.getStartDateTime().toString() : null,
+                    term.getEvent() != null ? term.getEvent().getOrganizationId() : null,
+                    caregiverIds,
+                    "event-owner");
+            eventTermEventProducer.publishEventTermCancelled(payload);
+        }
+
+        return saved;
     }
 
     public EventTerm updateEventTermCapacity(UUID eventTermId, int minParticipants, int maxParticipants) {

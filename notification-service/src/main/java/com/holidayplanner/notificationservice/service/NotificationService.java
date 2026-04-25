@@ -73,6 +73,15 @@ public class NotificationService {
         sendEmail(caregiverEmail, subject, body);
     }
 
+    // Notify parent about refund
+    public void notifyRefund(String parentEmail, String eventName, java.math.BigDecimal amount) {
+        String subject = "Refund Processed – " + eventName;
+        String body = String.format(
+                "Your refund of %.2f for \"%s\" has been processed.\n\nHoliday Planner Team",
+                amount, eventName);
+        sendEmail(parentEmail, subject, body);
+    }
+
     // Notify all caregivers about automatic cancellation
     public void notifyCaregiversOfAutoCancellation(List<String> caregiverEmails,
                                                     String eventName, String termDate) {

@@ -1,5 +1,7 @@
 package com.holidayplanner.paymentservice.service;
 
+import com.holidayplanner.paymentservice.kafka.PaymentEventProducer;
+import com.holidayplanner.shared.kafka.payload.PaymentRefundedPayload;
 import com.holidayplanner.shared.model.Payment;
 import com.holidayplanner.shared.model.PaymentStatus;
 import com.holidayplanner.paymentservice.repository.PaymentRepository;
@@ -16,6 +18,7 @@ import java.util.UUID;
 public class PaymentService {
 
     private final PaymentRepository paymentRepository;
+    private final PaymentEventProducer paymentEventProducer;
 
     public Payment createPayment(UUID bookingId, UUID organizationId, BigDecimal amount) {
         Payment payment = new Payment();
@@ -41,7 +44,14 @@ public class PaymentService {
         payment.setStatus(PaymentStatus.REFUNDED);
         payment.setRefundedAt(LocalDateTime.now());
         payment.setNote(note);
-        return paymentRepository.save(payment);
+        Payment saved = paymentRepository.save(payment);
+
+        PaymentRefundedPayload payload = new PaymentRefundedPayload(
+                saved.getId(), saved.getBookingId(), saved.getOrganizationId(),
+                null, null, saved.getAmount());
+        paymentEventProducer.publishPaymentRefunded(payload);
+
+        return saved;
     }
 
     public List<Payment> getPaymentsByOrganization(UUID organizationId) {

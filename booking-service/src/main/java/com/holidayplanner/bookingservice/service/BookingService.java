@@ -3,6 +3,10 @@ package com.holidayplanner.bookingservice.service;
 import com.holidayplanner.bookingservice.client.EventServiceClient;
 import com.holidayplanner.bookingservice.client.EventTermDetails;
 import com.holidayplanner.bookingservice.exception.BookingNotFoundException;
+import com.holidayplanner.bookingservice.kafka.BookingEventProducer;
+import com.holidayplanner.shared.kafka.payload.BookingCancelledPayload;
+import com.holidayplanner.shared.kafka.payload.BookingCreatedPayload;
+import com.holidayplanner.shared.kafka.payload.WaitlistPromotedPayload;
 import com.holidayplanner.shared.model.Booking;
 import com.holidayplanner.shared.model.BookingStatus;
 import com.holidayplanner.bookingservice.repository.BookingRepository;
@@ -18,6 +22,7 @@ public class BookingService {
 
     private final BookingRepository bookingRepository;
     private final EventServiceClient eventServiceClient;
+    private final BookingEventProducer bookingEventProducer;
 
     public List<Booking> getBookingsForEventTerm(UUID eventTermId) {
         return bookingRepository.findByEventTermId(eventTermId);
@@ -35,11 +40,21 @@ public class BookingService {
         Booking booking = new Booking();
         booking.setFamilyMemberId(familyMemberId);
         booking.setEventTermId(eventTermId);
-        booking.setStatus(confirmedCount < eventTerm.getMaxParticipants()
+        BookingStatus status = confirmedCount < eventTerm.getMaxParticipants()
                 ? BookingStatus.CONFIRMED
-                : BookingStatus.WAITLISTED);
+                : BookingStatus.WAITLISTED;
+        booking.setStatus(status);
 
-        return bookingRepository.save(booking);
+        Booking saved = bookingRepository.save(booking);
+
+        if (status == BookingStatus.CONFIRMED) {
+            BookingCreatedPayload payload = new BookingCreatedPayload(
+                    saved.getId(), saved.getFamilyMemberId(), saved.getEventTermId(),
+                    status.name(), null, null, null, null, null);
+            bookingEventProducer.publishBookingCreated(payload);
+        }
+
+        return saved;
     }
 
     public Booking cancelBooking(UUID bookingId) {
@@ -49,12 +64,27 @@ public class BookingService {
         booking.setStatus(BookingStatus.CANCELLED);
         bookingRepository.save(booking);
 
+        BookingCancelledPayload payload = new BookingCancelledPayload(
+                booking.getId(), booking.getFamilyMemberId(), booking.getEventTermId(),
+                null, null, null, "parent");
+        bookingEventProducer.publishBookingCancelled(payload);
+
         UUID eventTermId = booking.getEventTermId();
         if (eventTermId != null) {
             promoteFromWaitingList(eventTermId, 1);
         }
 
         return booking;
+    }
+
+    public void cancelAllBookings(UUID eventTermId) {
+        List<Booking> active = bookingRepository.findByEventTermId(eventTermId).stream()
+                .filter(b -> b.getStatus() != BookingStatus.CANCELLED)
+                .toList();
+        active.forEach(b -> {
+            b.setStatus(BookingStatus.CANCELLED);
+            bookingRepository.save(b);
+        });
     }
 
     public void promoteFromWaitingList(UUID eventTermId, int slots) {
@@ -66,6 +96,10 @@ public class BookingService {
                 .forEach(b -> {
                     b.setStatus(BookingStatus.CONFIRMED);
                     bookingRepository.save(b);
+                    WaitlistPromotedPayload payload = new WaitlistPromotedPayload(
+                            b.getId(), b.getFamilyMemberId(), b.getEventTermId(),
+                            null, null, null);
+                    bookingEventProducer.publishWaitlistPromoted(payload);
                 });
     }
 

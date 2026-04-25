@@ -55,14 +55,115 @@ services:
       KAFKA_CFG_GROUP_INITIAL_REBALANCE_DELAY_MS: 0
 
   kafkaui:
-    image: docker.redpanda.com/redpandadata/console:v3.7.1
+    image: docker.redpanda.com/redpandadata/console:latest
     ports:
-      - "5001:5001"
+      - "5000:5000"
     environment:
       KAFKA_BROKERS: "kafka:29092"
-      SERVER_LISTENPORT: "5001"
+      SERVER_LISTENPORT: "5000"
     depends_on:
       - kafka
+
+  booking-service:
+    image: muhiguezel/booking-service:latest
+    ports:
+      - "8082:8082"
+    depends_on:
+      postgres:
+        condition: service_healthy
+      kafka:
+        condition: service_started
+    environment:
+      SPRING_KAFKA_BOOTSTRAP_SERVERS: kafka:29092
+      DB_HOST: postgres
+      DB_NAME: booking_db
+      DB_USER: postgres
+      DB_PASSWORD: postgres
+
+  event-service:
+    image: muhiguezel/event-service:latest
+    ports:
+      - "8081:8081"
+    depends_on:
+      postgres:
+        condition: service_healthy
+      kafka:
+        condition: service_started
+    environment:
+      SPRING_KAFKA_BOOTSTRAP_SERVERS: kafka:29092
+      DB_HOST: postgres
+      DB_NAME: event_db
+      DB_USER: postgres
+      DB_PASSWORD: postgres
+
+  identity-service:
+    image: muhiguezel/identity-service:latest
+    ports:
+      - "8083:8083"
+    depends_on:
+      postgres:
+        condition: service_healthy
+    environment:
+      DB_HOST: postgres
+      DB_NAME: identity_db
+      DB_USER: postgres
+      DB_PASSWORD: postgres
+
+  organization-service:
+    image: muhiguezel/organization-service:latest
+    ports:
+      - "8084:8084"
+    depends_on:
+      postgres:
+        condition: service_healthy
+    environment:
+      DB_HOST: postgres
+      DB_NAME: organization_db
+      DB_USER: postgres
+      DB_PASSWORD: postgres
+
+  payment-service:
+    image: muhiguezel/payment-service:latest
+    ports:
+      - "8085:8085"
+    depends_on:
+      postgres:
+        condition: service_healthy
+      kafka:
+        condition: service_started
+    environment:
+      SPRING_KAFKA_BOOTSTRAP_SERVERS: kafka:29092
+      DB_HOST: postgres
+      DB_NAME: payment_db
+      DB_USER: postgres
+      DB_PASSWORD: postgres
+
+  notification-service:
+    image: muhiguezel/notification-service:latest
+    ports:
+      - "8086:8086"
+    depends_on:
+      kafka:
+        condition: service_started
+    environment:
+      SPRING_KAFKA_BOOTSTRAP_SERVERS: kafka:29092
+      MAIL_HOST: ${MAIL_HOST:-smtp.gmail.com}
+      MAIL_PORT: ${MAIL_PORT:-587}
+      MAIL_USERNAME: ${MAIL_USERNAME:-your-email@gmail.com}
+      MAIL_PASSWORD: ${MAIL_PASSWORD:-your-password}
+
+  booklet-service:
+    image: muhiguezel/booklet-service:latest
+    ports:
+      - "8087:8087"
+    depends_on:
+      postgres:
+        condition: service_healthy
+    environment:
+      DB_HOST: postgres
+      DB_NAME: booklet_db
+      DB_USER: postgres
+      DB_PASSWORD: postgres
 
 volumes:
   postgres_data:
