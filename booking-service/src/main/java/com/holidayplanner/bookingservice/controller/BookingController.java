@@ -22,24 +22,24 @@ public class BookingController {
     }
 
     @GetMapping("/event-term/{eventTermId}")
-    public ResponseEntity<List<Booking>> getBookingsForEventTerm(@PathVariable UUID eventTermId) {
+    public ResponseEntity<List<Booking>> getBookingsForEventTerm(@PathVariable("eventTermId") UUID eventTermId) {
         return ResponseEntity.ok(bookingService.getBookingsForEventTerm(eventTermId));
     }
 
     @PostMapping
     public ResponseEntity<Booking> createBooking(
-            @RequestParam UUID familyMemberId,
-            @RequestParam UUID eventTermId) {
+            @RequestParam("familyMemberId") UUID familyMemberId,
+            @RequestParam("eventTermId") UUID eventTermId) {
         return ResponseEntity.ok(bookingService.createBooking(familyMemberId, eventTermId));
     }
 
     @DeleteMapping("/{bookingId}")
-    public ResponseEntity<Booking> cancelBooking(@PathVariable UUID bookingId) {
+    public ResponseEntity<Booking> cancelBooking(@PathVariable("bookingId") UUID bookingId) {
         return ResponseEntity.ok(bookingService.cancelBooking(bookingId));
     }
 
     @GetMapping("/event-term/{eventTermId}/count")
-    public ResponseEntity<Long> getBookingCount(@PathVariable UUID eventTermId) {
+    public ResponseEntity<Long> getBookingCount(@PathVariable("eventTermId") UUID eventTermId) {
         return ResponseEntity.ok(bookingService.getBookingCount(eventTermId));
     }
 }

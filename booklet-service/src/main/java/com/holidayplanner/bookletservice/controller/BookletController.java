@@ -25,8 +25,8 @@ public class BookletController {
     // Generate full organization booklet as PDF download
     @PostMapping("/organization")
     public ResponseEntity<byte[]> generateBooklet(
-            @RequestParam String organizationName,
-            @RequestParam String contactInfo,
+            @RequestParam("organizationName") String organizationName,
+            @RequestParam("contactInfo") String contactInfo,
             @RequestBody GenerateBookletRequest request) throws IOException {
 
         byte[] pdf = bookletService.generateBooklet(
@@ -43,8 +43,8 @@ public class BookletController {
     // Generate participant list PDF for caregiver
     @PostMapping("/participant-list")
     public ResponseEntity<byte[]> generateParticipantList(
-            @RequestParam String eventName,
-            @RequestParam String termDate,
+            @RequestParam("eventName") String eventName,
+            @RequestParam("termDate") String termDate,
             @RequestBody List<String> participantNames) throws IOException {
 
         byte[] pdf = bookletService.generateParticipantListPdf(eventName, termDate, participantNames);

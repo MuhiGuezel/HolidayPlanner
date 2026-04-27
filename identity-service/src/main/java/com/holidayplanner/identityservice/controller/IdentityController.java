@@ -29,54 +29,54 @@ public class IdentityController {
 
     @PostMapping("/users/register")
     public ResponseEntity<User> register(
-            @RequestParam String email,
-            @RequestParam String password,
-            @RequestParam String phoneNumber,
-            @RequestParam UUID organizationId) {
+            @RequestParam("email") String email,
+            @RequestParam("password") String password,
+            @RequestParam("phoneNumber") String phoneNumber,
+            @RequestParam("organizationId") UUID organizationId) {
         return ResponseEntity.ok(identityService.registerUser(email, password, phoneNumber, organizationId));
     }
 
     @GetMapping("/users/{userId}")
-    public ResponseEntity<User> getUser(@PathVariable UUID userId) {
+    public ResponseEntity<User> getUser(@PathVariable("userId") UUID userId) {
         return ResponseEntity.ok(identityService.getUserById(userId));
     }
 
     @PatchMapping("/users/{userId}/phone")
     public ResponseEntity<User> updatePhone(
-            @PathVariable UUID userId,
-            @RequestParam String phoneNumber) {
+            @PathVariable("userId") UUID userId,
+            @RequestParam("phoneNumber") String phoneNumber) {
         return ResponseEntity.ok(identityService.updatePhoneNumber(userId, phoneNumber));
     }
 
     // --- FamilyMember Endpoints ---
 
     @GetMapping("/users/{userId}/family-members")
-    public ResponseEntity<List<FamilyMember>> getFamilyMembers(@PathVariable UUID userId) {
+    public ResponseEntity<List<FamilyMember>> getFamilyMembers(@PathVariable("userId") UUID userId) {
         return ResponseEntity.ok(identityService.getFamilyMembers(userId));
     }
 
     @PostMapping("/users/{userId}/family-members")
     public ResponseEntity<FamilyMember> addFamilyMember(
-            @PathVariable UUID userId,
-            @RequestParam String firstName,
-            @RequestParam String lastName,
-            @RequestParam LocalDate birthDate,
-            @RequestParam String zip) {
+            @PathVariable("userId") UUID userId,
+            @RequestParam("firstName") String firstName,
+            @RequestParam("lastName") String lastName,
+            @RequestParam("birthDate") LocalDate birthDate,
+            @RequestParam("zip") String zip) {
         return ResponseEntity.ok(identityService.addFamilyMember(userId, firstName, lastName, birthDate, zip));
     }
 
     @PutMapping("/family-members/{memberId}")
     public ResponseEntity<FamilyMember> updateFamilyMember(
-            @PathVariable UUID memberId,
-            @RequestParam String firstName,
-            @RequestParam String lastName,
-            @RequestParam LocalDate birthDate,
-            @RequestParam String zip) {
+            @PathVariable("memberId") UUID memberId,
+            @RequestParam("firstName") String firstName,
+            @RequestParam("lastName") String lastName,
+            @RequestParam("birthDate") LocalDate birthDate,
+            @RequestParam("zip") String zip) {
         return ResponseEntity.ok(identityService.updateFamilyMember(memberId, firstName, lastName, birthDate, zip));
     }
 
     @DeleteMapping("/family-members/{memberId}")
-    public ResponseEntity<Void> removeFamilyMember(@PathVariable UUID memberId) {
+    public ResponseEntity<Void> removeFamilyMember(@PathVariable("memberId") UUID memberId) {
         identityService.removeFamilyMember(memberId);
         return ResponseEntity.noContent().build();
     }
@@ -85,10 +85,10 @@ public class IdentityController {
 
     @PostMapping("/caregivers")
     public ResponseEntity<Caregiver> createCaregiver(
-            @RequestParam String firstName,
-            @RequestParam String lastName,
-            @RequestParam String email,
-            @RequestParam String phoneNumber) {
+            @RequestParam("firstName") String firstName,
+            @RequestParam("lastName") String lastName,
+            @RequestParam("email") String email,
+            @RequestParam("phoneNumber") String phoneNumber) {
         return ResponseEntity.ok(identityService.createCaregiver(firstName, lastName, email, phoneNumber));
     }
 
@@ -98,7 +98,7 @@ public class IdentityController {
     }
 
     @GetMapping("/caregivers/{caregiverId}")
-    public ResponseEntity<Caregiver> getCaregiver(@PathVariable UUID caregiverId) {
+    public ResponseEntity<Caregiver> getCaregiver(@PathVariable("caregiverId") UUID caregiverId) {
         return ResponseEntity.ok(identityService.getCaregiverById(caregiverId));
     }
 }

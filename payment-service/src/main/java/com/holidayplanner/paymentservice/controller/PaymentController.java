@@ -24,43 +24,43 @@ public class PaymentController {
 
     @PostMapping
     public ResponseEntity<Payment> createPayment(
-            @RequestParam UUID bookingId,
-            @RequestParam UUID organizationId,
-            @RequestParam BigDecimal amount) {
+            @RequestParam("bookingId") UUID bookingId,
+            @RequestParam("organizationId") UUID organizationId,
+            @RequestParam("amount") BigDecimal amount) {
         return ResponseEntity.ok(paymentService.createPayment(bookingId, organizationId, amount));
     }
 
     @GetMapping("/organization/{organizationId}")
-    public ResponseEntity<List<Payment>> getPaymentsByOrganization(@PathVariable UUID organizationId) {
+    public ResponseEntity<List<Payment>> getPaymentsByOrganization(@PathVariable("organizationId") UUID organizationId) {
         return ResponseEntity.ok(paymentService.getPaymentsByOrganization(organizationId));
     }
 
     @GetMapping("/organization/{organizationId}/pending")
-    public ResponseEntity<List<Payment>> getPendingPayments(@PathVariable UUID organizationId) {
+    public ResponseEntity<List<Payment>> getPendingPayments(@PathVariable("organizationId") UUID organizationId) {
         return ResponseEntity.ok(paymentService.getPendingPayments(organizationId));
     }
 
     @GetMapping("/booking/{bookingId}")
-    public ResponseEntity<Payment> getPaymentByBooking(@PathVariable UUID bookingId) {
+    public ResponseEntity<Payment> getPaymentByBooking(@PathVariable("bookingId") UUID bookingId) {
         return ResponseEntity.ok(paymentService.getPaymentByBooking(bookingId));
     }
 
     @PatchMapping("/{paymentId}/pay")
     public ResponseEntity<Payment> markAsPaid(
-            @PathVariable UUID paymentId,
-            @RequestParam(required = false) String note) {
+            @PathVariable("paymentId") UUID paymentId,
+            @RequestParam(value = "note", required = false) String note) {
         return ResponseEntity.ok(paymentService.markAsPaid(paymentId, note));
     }
 
     @PatchMapping("/{paymentId}/refund")
     public ResponseEntity<Payment> refundPayment(
-            @PathVariable UUID paymentId,
-            @RequestParam(required = false) String note) {
+            @PathVariable("paymentId") UUID paymentId,
+            @RequestParam(value = "note", required = false) String note) {
         return ResponseEntity.ok(paymentService.refundPayment(paymentId, note));
     }
 
     @GetMapping("/organization/{organizationId}/balance")
-    public ResponseEntity<BigDecimal> getBalance(@PathVariable UUID organizationId) {
+    public ResponseEntity<BigDecimal> getBalance(@PathVariable("organizationId") UUID organizationId) {
         return ResponseEntity.ok(paymentService.calculateBalance(organizationId));
     }
 }

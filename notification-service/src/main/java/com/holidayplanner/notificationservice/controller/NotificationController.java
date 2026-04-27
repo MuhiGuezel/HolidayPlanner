@@ -37,9 +37,9 @@ public class NotificationController {
     // Notify booking confirmed
     @PostMapping("/booking-confirmed")
     public ResponseEntity<String> notifyBookingConfirmed(
-            @RequestParam String parentEmail,
-            @RequestParam String eventName,
-            @RequestParam String termDate) {
+            @RequestParam("parentEmail") String parentEmail,
+            @RequestParam("eventName") String eventName,
+            @RequestParam("termDate") String termDate) {
         notificationService.notifyBookingConfirmed(parentEmail, eventName, termDate);
         return ResponseEntity.ok("Booking confirmation sent");
     }
@@ -47,9 +47,9 @@ public class NotificationController {
     // Notify term cancelled
     @PostMapping("/term-cancelled")
     public ResponseEntity<String> notifyTermCancelled(
-            @RequestParam String parentEmail,
-            @RequestParam String eventName,
-            @RequestParam String termDate) {
+            @RequestParam("parentEmail") String parentEmail,
+            @RequestParam("eventName") String eventName,
+            @RequestParam("termDate") String termDate) {
         notificationService.notifyTermCancelled(parentEmail, eventName, termDate);
         return ResponseEntity.ok("Cancellation notification sent");
     }
@@ -57,9 +57,9 @@ public class NotificationController {
     // Notify booking cancelled by owner
     @PostMapping("/booking-cancelled-by-owner")
     public ResponseEntity<String> notifyBookingCancelledByOwner(
-            @RequestParam String parentEmail,
-            @RequestParam String eventName,
-            @RequestParam String termDate) {
+            @RequestParam("parentEmail") String parentEmail,
+            @RequestParam("eventName") String eventName,
+            @RequestParam("termDate") String termDate) {
         notificationService.notifyBookingCancelledByOwner(parentEmail, eventName, termDate);
         return ResponseEntity.ok("Cancellation by owner notification sent");
     }
@@ -67,9 +67,9 @@ public class NotificationController {
     // Notify caregiver with participant list
     @PostMapping("/caregiver-participants")
     public ResponseEntity<String> notifyCaregiverWithParticipants(
-            @RequestParam String caregiverEmail,
-            @RequestParam String eventName,
-            @RequestParam String termDate,
+            @RequestParam("caregiverEmail") String caregiverEmail,
+            @RequestParam("eventName") String eventName,
+            @RequestParam("termDate") String termDate,
             @RequestBody List<String> participantNames) {
         notificationService.notifyCaregiverWithParticipants(caregiverEmail, eventName, termDate, participantNames);
         return ResponseEntity.ok("Caregiver notified with participant list");
@@ -78,8 +78,8 @@ public class NotificationController {
     // Notify caregivers of auto-cancellation
     @PostMapping("/auto-cancellation")
     public ResponseEntity<String> notifyAutoCancellation(
-            @RequestParam String eventName,
-            @RequestParam String termDate,
+            @RequestParam("eventName") String eventName,
+            @RequestParam("termDate") String termDate,
             @RequestBody List<String> caregiverEmails) {
         notificationService.notifyCaregiversOfAutoCancellation(caregiverEmails, eventName, termDate);
         return ResponseEntity.ok("Auto-cancellation notifications sent");

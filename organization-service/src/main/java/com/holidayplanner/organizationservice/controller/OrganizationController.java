@@ -27,9 +27,9 @@ public class OrganizationController {
 
     @PostMapping
     public ResponseEntity<Organization> createOrganization(
-            @RequestParam String name,
-            @RequestParam String bankAccount,
-            @RequestParam(required = false) LocalDateTime bookingStartTime) {
+            @RequestParam("name") String name,
+            @RequestParam("bankAccount") String bankAccount,
+            @RequestParam(value = "bookingStartTime", required = false) LocalDateTime bookingStartTime) {
         return ResponseEntity.ok(organizationService.createOrganization(name, bankAccount, bookingStartTime));
     }
 
@@ -39,39 +39,39 @@ public class OrganizationController {
     }
 
     @GetMapping("/{organizationId}")
-    public ResponseEntity<Organization> getOrganization(@PathVariable UUID organizationId) {
+    public ResponseEntity<Organization> getOrganization(@PathVariable("organizationId") UUID organizationId) {
         return ResponseEntity.ok(organizationService.getOrganization(organizationId));
     }
 
     @PutMapping("/{organizationId}")
     public ResponseEntity<Organization> updateOrganization(
-            @PathVariable UUID organizationId,
-            @RequestParam String bankAccount,
-            @RequestParam(required = false) LocalDateTime bookingStartTime) {
+            @PathVariable("organizationId") UUID organizationId,
+            @RequestParam("bankAccount") String bankAccount,
+            @RequestParam(value = "bookingStartTime", required = false) LocalDateTime bookingStartTime) {
         return ResponseEntity.ok(organizationService.updateOrganization(organizationId, bankAccount, bookingStartTime));
     }
 
     // --- TeamMember Endpoints ---
 
     @GetMapping("/{organizationId}/team-members")
-    public ResponseEntity<List<TeamMember>> getTeamMembers(@PathVariable UUID organizationId) {
+    public ResponseEntity<List<TeamMember>> getTeamMembers(@PathVariable("organizationId") UUID organizationId) {
         return ResponseEntity.ok(organizationService.getTeamMembers(organizationId));
     }
 
     @PostMapping("/{organizationId}/team-members")
     public ResponseEntity<TeamMember> addTeamMember(
-            @PathVariable UUID organizationId,
-            @RequestParam UUID userId,
-            @RequestParam String firstName,
-            @RequestParam String lastName,
-            @RequestParam String email,
-            @RequestParam(defaultValue = "TEAM_MEMBER") TeamMemberRole role) {
+            @PathVariable("organizationId") UUID organizationId,
+            @RequestParam("userId") UUID userId,
+            @RequestParam("firstName") String firstName,
+            @RequestParam("lastName") String lastName,
+            @RequestParam("email") String email,
+            @RequestParam(value = "role", defaultValue = "TEAM_MEMBER") TeamMemberRole role) {
         return ResponseEntity.ok(organizationService.addTeamMember(
                 organizationId, userId, firstName, lastName, email, role));
     }
 
     @DeleteMapping("/team-members/{teamMemberId}")
-    public ResponseEntity<Void> removeTeamMember(@PathVariable UUID teamMemberId) {
+    public ResponseEntity<Void> removeTeamMember(@PathVariable("teamMemberId") UUID teamMemberId) {
         organizationService.removeTeamMember(teamMemberId);
         return ResponseEntity.noContent().build();
     }
@@ -79,20 +79,20 @@ public class OrganizationController {
     // --- Sponsor Endpoints ---
 
     @GetMapping("/{organizationId}/sponsors")
-    public ResponseEntity<List<Sponsor>> getSponsors(@PathVariable UUID organizationId) {
+    public ResponseEntity<List<Sponsor>> getSponsors(@PathVariable("organizationId") UUID organizationId) {
         return ResponseEntity.ok(organizationService.getSponsors(organizationId));
     }
 
     @PostMapping("/{organizationId}/sponsors")
     public ResponseEntity<Sponsor> addSponsor(
-            @PathVariable UUID organizationId,
-            @RequestParam String name,
-            @RequestParam(required = false) BigDecimal amount) {
+            @PathVariable("organizationId") UUID organizationId,
+            @RequestParam("name") String name,
+            @RequestParam(value = "amount", required = false) BigDecimal amount) {
         return ResponseEntity.ok(organizationService.addSponsor(organizationId, name, amount));
     }
 
     @DeleteMapping("/sponsors/{sponsorId}")
-    public ResponseEntity<Void> removeSponsor(@PathVariable UUID sponsorId) {
+    public ResponseEntity<Void> removeSponsor(@PathVariable("sponsorId") UUID sponsorId) {
         organizationService.removeSponsor(sponsorId);
         return ResponseEntity.noContent().build();
     }
