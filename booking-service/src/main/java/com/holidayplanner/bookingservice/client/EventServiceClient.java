@@ -25,7 +25,7 @@ public class EventServiceClient {
     }
 
     public EventTermDetails getEventTerm(UUID eventTermId) {
-        String url = eventServiceUrl + "/api/event-terms/" + eventTermId;
+        String url = eventServiceUrl + "/api/events/terms/" + eventTermId;
         try {
             return restClient.get()
                     .uri(url)
