@@ -36,7 +36,7 @@ Kafka UI: http://localhost:5001
 | Muhammed Güzel | `BookingService` |
 | Tarik Pasalic | `BookingService` |
 | Jan Burtscher | `OrganizationService` + `PaymentService` |
-| Aleksander Lukis | `OrganizationService` + `PaymentService` |
+| Aleksander Lukic | `OrganizationService` + `PaymentService` |
 | Fabian Türtscher | `NotificationService` + `BookletService` |
 
 ---
