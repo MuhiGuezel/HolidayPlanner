@@ -8,6 +8,7 @@ import com.holidayplanner.eventservice.repository.EventTermRepository;
 import com.holidayplanner.eventservice.repository.RemarkRepository;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 
 import java.math.BigDecimal;
 import java.time.LocalDateTime;
@@ -16,6 +17,7 @@ import java.util.UUID;
 import java.util.stream.Collectors;
 
 @Service
+@Transactional
 @RequiredArgsConstructor
 public class EventManagementService {
 
@@ -25,6 +27,19 @@ public class EventManagementService {
     private final EventTermEventProducer eventTermEventProducer;
 
     // --- Event Operations ---
+
+    public Event createEvent(UUID organizationId, UUID eventOwnerId, String shortTitle,
+                             String description, String location, int minimalAge, int maximalAge) {
+        Event event = new Event();
+        event.setOrganizationId(organizationId);
+        event.setEventOwnerId(eventOwnerId);
+        event.setShortTitle(shortTitle);
+        event.setDescription(description);
+        event.setLocation(location);
+        event.setMinimalAge(minimalAge);
+        event.setMaximalAge(maximalAge);
+        return eventRepository.save(event);
+    }
 
     public Event updateEvent(UUID eventId, String shortTitle, String description,
                              String location, String meetingPoint, BigDecimal price,
@@ -70,7 +85,7 @@ public class EventManagementService {
     }
 
     public EventTerm changeEventTermStatus(UUID eventTermId, EventTermStatus newStatus) {
-        EventTerm term = eventTermRepository.findById(eventTermId)
+        EventTerm term = eventTermRepository.findByIdWithEvent(eventTermId)
                 .orElseThrow(() -> new RuntimeException("EventTerm not found: " + eventTermId));
 
         term.setStatus(newStatus);
@@ -114,7 +129,7 @@ public class EventManagementService {
     }
 
     public EventTerm verifyEventTerm(UUID eventTermId) {
-        return eventTermRepository.findById(eventTermId)
+        return eventTermRepository.findByIdWithEvent(eventTermId)
                 .orElseThrow(() -> new RuntimeException("EventTerm not found: " + eventTermId));
     }
 
