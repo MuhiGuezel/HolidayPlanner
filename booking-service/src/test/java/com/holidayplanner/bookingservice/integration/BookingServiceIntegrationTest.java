@@ -1,7 +1,7 @@
 package com.holidayplanner.bookingservice.integration;
 
 import com.holidayplanner.bookingservice.client.EventServiceClient;
-import com.holidayplanner.bookingservice.client.EventTermDetails;
+import com.holidayplanner.bookingservice.dto.EventTermDetailResponse;
 import com.holidayplanner.bookingservice.exception.BookingNotFoundException;
 import com.holidayplanner.bookingservice.exception.EventServiceException;
 import com.holidayplanner.bookingservice.exception.EventTermNotFoundException;
@@ -49,8 +49,8 @@ class BookingServiceIntegrationTest {
         bookingRepository.deleteAll();
     }
 
-    private EventTermDetails activeEventTerm(int maxParticipants) {
-        EventTermDetails d = new EventTermDetails();
+    private EventTermDetailResponse activeEventTerm(int maxParticipants) {
+        EventTermDetailResponse d = new EventTermDetailResponse();
         d.setId(EVENT_TERM_ID);
         d.setStatus("ACTIVE");
         d.setMaxParticipants(maxParticipants);
@@ -116,7 +116,7 @@ class BookingServiceIntegrationTest {
 
     @Test
     void createBooking_whenEventTermNotActive_throwsIllegalState() {
-        EventTermDetails draft = new EventTermDetails();
+        EventTermDetailResponse draft = new EventTermDetailResponse();
         draft.setStatus("DRAFT");
         draft.setMaxParticipants(10);
         when(eventServiceClient.getEventTerm(EVENT_TERM_ID)).thenReturn(draft);
@@ -131,7 +131,7 @@ class BookingServiceIntegrationTest {
     void createBooking_whenEventServiceReturnsPartialResponse_stillPersists() {
         // EventService returns a response with only the required fields; optional fields are null.
         // Service must not crash on a partial (but valid) response.
-        EventTermDetails partial = new EventTermDetails();
+        EventTermDetailResponse partial = new EventTermDetailResponse();
         partial.setStatus("ACTIVE");
         partial.setMaxParticipants(5);
         // startDate, endDate, eventId are intentionally left null

@@ -3,7 +3,7 @@ package com.holidayplanner.bookingservice.contract;
 import com.github.tomakehurst.wiremock.client.WireMock;
 import com.github.tomakehurst.wiremock.junit5.WireMockExtension;
 import com.holidayplanner.bookingservice.client.EventServiceClient;
-import com.holidayplanner.bookingservice.client.EventTermDetails;
+import com.holidayplanner.bookingservice.dto.EventTermDetailResponse;
 import com.holidayplanner.bookingservice.exception.EventServiceException;
 import com.holidayplanner.bookingservice.exception.EventTermNotFoundException;
 import org.junit.jupiter.api.BeforeEach;
@@ -59,7 +59,7 @@ class EventServiceConsumerContractTest {
                         }
                         """.formatted(id))));
 
-        EventTermDetails details = eventServiceClient.getEventTerm(id);
+        EventTermDetailResponse details = eventServiceClient.getEventTerm(id);
 
         assertThat(details.getId()).isEqualTo(id);
         assertThat(details.getStatus()).isEqualTo("ACTIVE");
@@ -78,7 +78,7 @@ class EventServiceConsumerContractTest {
                         }
                         """.formatted(id))));
 
-        EventTermDetails details = eventServiceClient.getEventTerm(id);
+        EventTermDetailResponse details = eventServiceClient.getEventTerm(id);
 
         assertThat(details.getStatus()).isEqualTo("DRAFT");
     }
@@ -98,7 +98,7 @@ class EventServiceConsumerContractTest {
                         }
                         """.formatted(id))));
 
-        EventTermDetails details = eventServiceClient.getEventTerm(id);
+        EventTermDetailResponse details = eventServiceClient.getEventTerm(id);
 
         assertThat(details.getStatus()).isEqualTo("ACTIVE");
         assertThat(details.getMaxParticipants()).isEqualTo(5);

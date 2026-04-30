@@ -1,5 +1,6 @@
 package com.holidayplanner.bookingservice.client;
 
+import com.holidayplanner.bookingservice.dto.EventTermDetailResponse;
 import com.holidayplanner.bookingservice.exception.EventServiceException;
 import com.holidayplanner.bookingservice.exception.EventTermNotFoundException;
 import org.springframework.beans.factory.annotation.Value;
@@ -24,7 +25,7 @@ public class EventServiceClient {
         this.eventServiceUrl = eventServiceUrl;
     }
 
-    public EventTermDetails getEventTerm(UUID eventTermId) {
+    public EventTermDetailResponse getEventTerm(UUID eventTermId) {
         String url = eventServiceUrl + "/api/events/terms/" + eventTermId;
         try {
             return restClient.get()
@@ -36,7 +37,7 @@ public class EventServiceClient {
                     .onStatus(HttpStatusCode::is5xxServerError, (req, res) -> {
                         throw new EventServiceException("Event service returned server error", null);
                     })
-                    .body(EventTermDetails.class);
+                    .body(EventTermDetailResponse.class);
         } catch (EventTermNotFoundException | EventServiceException e) {
             throw e;
         } catch (ResourceAccessException e) {

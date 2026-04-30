@@ -1,7 +1,7 @@
 package com.holidayplanner.bookingservice.component;
 
 import com.holidayplanner.bookingservice.client.EventServiceClient;
-import com.holidayplanner.bookingservice.client.EventTermDetails;
+import com.holidayplanner.bookingservice.dto.EventTermDetailResponse;
 import com.holidayplanner.bookingservice.exception.EventServiceException;
 import com.holidayplanner.bookingservice.exception.EventTermNotFoundException;
 import com.holidayplanner.bookingservice.repository.BookingRepository;
@@ -49,8 +49,8 @@ class BookingControllerComponentTest {
         bookingRepository.deleteAll();
     }
 
-    private EventTermDetails activeEventTerm(int maxParticipants) {
-        EventTermDetails d = new EventTermDetails();
+    private EventTermDetailResponse activeEventTerm(int maxParticipants) {
+        EventTermDetailResponse d = new EventTermDetailResponse();
         d.setId(EVENT_TERM_ID);
         d.setStatus("ACTIVE");
         d.setMaxParticipants(maxParticipants);
@@ -110,7 +110,7 @@ class BookingControllerComponentTest {
 
     @Test
     void createBooking_whenEventTermNotActive_returns409() throws Exception {
-        EventTermDetails draft = new EventTermDetails();
+        EventTermDetailResponse draft = new EventTermDetailResponse();
         draft.setStatus("DRAFT");
         draft.setMaxParticipants(10);
         when(eventServiceClient.getEventTerm(EVENT_TERM_ID)).thenReturn(draft);

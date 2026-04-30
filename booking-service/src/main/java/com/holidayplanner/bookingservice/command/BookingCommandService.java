@@ -1,15 +1,16 @@
-package com.holidayplanner.bookingservice.service;
+package com.holidayplanner.bookingservice.command;
 
 import com.holidayplanner.bookingservice.client.EventServiceClient;
+import com.holidayplanner.bookingservice.dto.BookingResponse;
 import com.holidayplanner.bookingservice.dto.EventTermDetailResponse;
 import com.holidayplanner.bookingservice.exception.BookingNotFoundException;
 import com.holidayplanner.bookingservice.kafka.BookingEventProducer;
+import com.holidayplanner.bookingservice.repository.BookingRepository;
 import com.holidayplanner.shared.kafka.payload.BookingCancelledPayload;
 import com.holidayplanner.shared.kafka.payload.BookingCreatedPayload;
 import com.holidayplanner.shared.kafka.payload.WaitlistPromotedPayload;
 import com.holidayplanner.shared.model.Booking;
 import com.holidayplanner.shared.model.BookingStatus;
-import com.holidayplanner.bookingservice.repository.BookingRepository;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 
@@ -18,17 +19,13 @@ import java.util.UUID;
 
 @Service
 @RequiredArgsConstructor
-public class BookingService {
+public class BookingCommandService {
 
     private final BookingRepository bookingRepository;
     private final EventServiceClient eventServiceClient;
     private final BookingEventProducer bookingEventProducer;
 
-    public List<Booking> getBookingsForEventTerm(UUID eventTermId) {
-        return bookingRepository.findByEventTermId(eventTermId);
-    }
-
-    public Booking createBooking(UUID familyMemberId, UUID eventTermId) {
+    public BookingResponse createBooking(UUID familyMemberId, UUID eventTermId) {
         EventTermDetailResponse eventTerm = eventServiceClient.getEventTerm(eventTermId);
 
         if (!"ACTIVE".equals(eventTerm.getStatus())) {
@@ -54,10 +51,10 @@ public class BookingService {
             bookingEventProducer.publishBookingCreated(payload);
         }
 
-        return saved;
+        return BookingResponse.from(saved);
     }
 
-    public Booking cancelBooking(UUID bookingId) {
+    public BookingResponse cancelBooking(UUID bookingId) {
         Booking booking = bookingRepository.findById(bookingId)
                 .orElseThrow(() -> new BookingNotFoundException(bookingId));
 
@@ -74,7 +71,7 @@ public class BookingService {
             promoteFromWaitingList(eventTermId, 1);
         }
 
-        return booking;
+        return BookingResponse.from(booking);
     }
 
     public void cancelAllBookings(UUID eventTermId) {
@@ -101,9 +98,5 @@ public class BookingService {
                             null, null, null);
                     bookingEventProducer.publishWaitlistPromoted(payload);
                 });
-    }
-
-    public long getBookingCount(UUID eventTermId) {
-        return bookingRepository.countByEventTermIdAndStatus(eventTermId, BookingStatus.CONFIRMED);
     }
 }

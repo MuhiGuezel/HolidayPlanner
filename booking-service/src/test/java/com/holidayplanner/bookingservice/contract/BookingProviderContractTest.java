@@ -1,7 +1,7 @@
 package com.holidayplanner.bookingservice.contract;
 
 import com.holidayplanner.bookingservice.client.EventServiceClient;
-import com.holidayplanner.bookingservice.client.EventTermDetails;
+import com.holidayplanner.bookingservice.dto.EventTermDetailResponse;
 import com.holidayplanner.bookingservice.exception.EventServiceException;
 import com.holidayplanner.bookingservice.exception.EventTermNotFoundException;
 import com.holidayplanner.bookingservice.repository.BookingRepository;
@@ -58,7 +58,7 @@ class BookingProviderContractTest {
 
     @Test
     void contract_createBooking_responseShape() throws Exception {
-        EventTermDetails term = new EventTermDetails();
+        EventTermDetailResponse term = new EventTermDetailResponse();
         term.setStatus("ACTIVE");
         term.setMaxParticipants(10);
         when(eventServiceClient.getEventTerm(EVENT_TERM_ID)).thenReturn(term);
@@ -80,7 +80,7 @@ class BookingProviderContractTest {
 
     @Test
     void contract_createBooking_statusIsConfirmedOrWaitlisted() throws Exception {
-        EventTermDetails term = new EventTermDetails();
+        EventTermDetailResponse term = new EventTermDetailResponse();
         term.setStatus("ACTIVE");
         term.setMaxParticipants(10);
         when(eventServiceClient.getEventTerm(any())).thenReturn(term);
@@ -92,7 +92,7 @@ class BookingProviderContractTest {
                 .andExpect(jsonPath("$.status").value("CONFIRMED"));
 
         // Fill capacity then the next must be WAITLISTED
-        EventTermDetails full = new EventTermDetails();
+        EventTermDetailResponse full = new EventTermDetailResponse();
         full.setStatus("ACTIVE");
         full.setMaxParticipants(0); // force waitlist
         when(eventServiceClient.getEventTerm(any())).thenReturn(full);
@@ -108,7 +108,7 @@ class BookingProviderContractTest {
 
     @Test
     void contract_cancelBooking_responseShape() throws Exception {
-        EventTermDetails term = new EventTermDetails();
+        EventTermDetailResponse term = new EventTermDetailResponse();
         term.setStatus("ACTIVE");
         term.setMaxParticipants(10);
         when(eventServiceClient.getEventTerm(any())).thenReturn(term);
@@ -177,7 +177,7 @@ class BookingProviderContractTest {
 
     @Test
     void contract_409ErrorShape_whenEventTermNotActive() throws Exception {
-        EventTermDetails draft = new EventTermDetails();
+        EventTermDetailResponse draft = new EventTermDetailResponse();
         draft.setStatus("DRAFT");
         draft.setMaxParticipants(10);
         when(eventServiceClient.getEventTerm(EVENT_TERM_ID)).thenReturn(draft);

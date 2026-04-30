@@ -2,7 +2,7 @@ package com.holidayplanner.bookingservice.kafka;
 
 import com.fasterxml.jackson.core.type.TypeReference;
 import com.fasterxml.jackson.databind.ObjectMapper;
-import com.holidayplanner.bookingservice.service.BookingService;
+import com.holidayplanner.bookingservice.command.BookingCommandService;
 import com.holidayplanner.shared.kafka.KafkaEnvelope;
 import com.holidayplanner.shared.kafka.payload.EventTermCancelledPayload;
 import lombok.RequiredArgsConstructor;
@@ -15,7 +15,7 @@ import org.springframework.stereotype.Service;
 @RequiredArgsConstructor
 public class EventTermCancelledConsumer {
 
-    private final BookingService bookingService;
+    private final BookingCommandService bookingCommandService;
     private final ObjectMapper objectMapper;
 
     @KafkaListener(topics = "holiday-planner.event.term-cancelled", groupId = "booking-service")
@@ -25,7 +25,7 @@ public class EventTermCancelledConsumer {
                     message,
                     new TypeReference<KafkaEnvelope<EventTermCancelledPayload>>() {});
             EventTermCancelledPayload payload = envelope.getPayload();
-            bookingService.cancelAllBookings(payload.getEventTermId());
+            bookingCommandService.cancelAllBookings(payload.getEventTermId());
             log.info("Cancelled all bookings for event term {}", payload.getEventTermId());
         } catch (Exception e) {
             log.error("Failed to process EventTermCancelled event: {}", e.getMessage());
