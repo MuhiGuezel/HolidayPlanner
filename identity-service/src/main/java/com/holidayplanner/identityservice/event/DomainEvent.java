@@ -6,16 +6,15 @@ import lombok.NoArgsConstructor;
 import com.fasterxml.jackson.annotation.JsonProperty;
 
 import java.time.Instant;
-import java.util.UUID;
 
 /**
  * Base class for all domain events in the Identity Service.
  * 
  * Envelope structure includes:
  * - eventType: semantic event name for consumer routing
- * - timestamp: server time for ordering/replay
- * - eventId: unique per event for idempotency
  * - version: schema version for forward/backward compatibility
+ * - timestamp: server time for ordering/replay
+ * - source: publishing service name for traceability
  * - payload: event-specific data
  */
 @Data
@@ -25,15 +24,15 @@ public class DomainEvent {
     
     @JsonProperty("eventType")
     private String eventType;
+
+    @JsonProperty("version")
+    private String version;
     
     @JsonProperty("timestamp")
     private Instant timestamp;
     
-    @JsonProperty("eventId")
-    private String eventId;
-    
-    @JsonProperty("version")
-    private int version;
+    @JsonProperty("source")
+    private String source;
     
     @JsonProperty("payload")
     private Object payload;
@@ -44,9 +43,9 @@ public class DomainEvent {
     public static DomainEvent of(String eventType, Object payload) {
         DomainEvent event = new DomainEvent();
         event.setEventType(eventType);
+        event.setVersion("1");
         event.setTimestamp(Instant.now());
-        event.setEventId(UUID.randomUUID().toString());
-        event.setVersion(1);
+        event.setSource("identity-service");
         event.setPayload(payload);
         return event;
     }

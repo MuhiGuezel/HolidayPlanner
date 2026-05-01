@@ -12,17 +12,15 @@ import org.springframework.stereotype.Service;
  * Service for publishing domain events to Kafka topics.
  * 
  * Handles:
- * - UserRegisteredEvent → identity.user.registered
- * - UserPhoneUpdatedEvent → identity.user.phone_updated
- * - FamilyMemberAddedEvent → identity.family_member.added
- * - FamilyMemberRemovedEvent → identity.family_member.removed
+ * - UserRegisteredEvent → holiday-planner.identity.user-registered
+ * - UserPhoneUpdatedEvent → holiday-planner.identity.user-phone-updated
+ * - FamilyMemberAddedEvent → holiday-planner.identity.family-member-added
+ * - FamilyMemberRemovedEvent → holiday-planner.identity.family-member-removed
  * 
  * All events wrapped in DomainEvent envelope with:
- * - eventId: unique for idempotency
- * - timestamp: server time
- * - version: schema version
- * 
- * Message keys use pattern: {entityType}:{entityId}
+ * - eventType, version, timestamp, source, payload
+ *
+ * Message keys use the plain entity UUID to preserve partition ordering per entity.
  * This ensures ordering per entity (partitioned by key).
  */
 @Slf4j
@@ -36,8 +34,8 @@ public class DomainEventPublisher {
      * Publish UserRegisteredEvent
      */
     public void publishUserRegistered(UserRegisteredEvent payload) {
-        String topic = "identity.user.registered";
-        String key = "user:" + payload.getUserId();
+        String topic = "holiday-planner.identity.user-registered";
+        String key = payload.getUserId().toString();
         DomainEvent event = DomainEvent.of("UserRegistered", payload);
         publishEvent(topic, key, event);
         log.info("Published UserRegisteredEvent for user {} to topic {}", payload.getUserId(), topic);
@@ -47,8 +45,8 @@ public class DomainEventPublisher {
      * Publish UserPhoneUpdatedEvent
      */
     public void publishUserPhoneUpdated(UserPhoneUpdatedEvent payload) {
-        String topic = "identity.user.phone_updated";
-        String key = "user:" + payload.getUserId();
+        String topic = "holiday-planner.identity.user-phone-updated";
+        String key = payload.getUserId().toString();
         DomainEvent event = DomainEvent.of("UserPhoneUpdated", payload);
         publishEvent(topic, key, event);
         log.info("Published UserPhoneUpdatedEvent for user {} to topic {}", payload.getUserId(), topic);
@@ -58,8 +56,8 @@ public class DomainEventPublisher {
      * Publish FamilyMemberAddedEvent
      */
     public void publishFamilyMemberAdded(FamilyMemberAddedEvent payload) {
-        String topic = "identity.family_member.added";
-        String key = "family_member:" + payload.getFamilyMemberId();
+        String topic = "holiday-planner.identity.family-member-added";
+        String key = payload.getFamilyMemberId().toString();
         DomainEvent event = DomainEvent.of("FamilyMemberAdded", payload);
         publishEvent(topic, key, event);
         log.info("Published FamilyMemberAddedEvent for member {} to topic {}", payload.getFamilyMemberId(), topic);
@@ -69,8 +67,8 @@ public class DomainEventPublisher {
      * Publish FamilyMemberRemovedEvent
      */
     public void publishFamilyMemberRemoved(FamilyMemberRemovedEvent payload) {
-        String topic = "identity.family_member.removed";
-        String key = "family_member:" + payload.getFamilyMemberId();
+        String topic = "holiday-planner.identity.family-member-removed";
+        String key = payload.getFamilyMemberId().toString();
         DomainEvent event = DomainEvent.of("FamilyMemberRemoved", payload);
         publishEvent(topic, key, event);
         log.info("Published FamilyMemberRemovedEvent for member {} to topic {}", payload.getFamilyMemberId(), topic);
@@ -88,7 +86,7 @@ public class DomainEventPublisher {
                     .build();
 
             kafkaTemplate.send(message);
-            log.debug("Event published to topic {} with key {}: eventId={}", topic, key, event.getEventId());
+            log.debug("Event published to topic {} with key {}: eventType={}", topic, key, event.getEventType());
         } catch (Exception e) {
             log.error("Failed to publish event to topic {}: {}", topic, e.getMessage(), e);
             // In production, consider: retry logic, dead letter queue, alerting

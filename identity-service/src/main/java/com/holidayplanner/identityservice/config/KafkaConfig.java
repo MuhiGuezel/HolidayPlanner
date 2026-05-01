@@ -29,12 +29,12 @@ import java.util.Map;
  * - Set serialization/deserialization strategy (JSON)
  * 
  * Topics Created:
- * - identity.user.registered (from registerUser)
- * - identity.user.phone_updated (from updatePhoneNumber)
- * - identity.family_member.added (from addFamilyMember)
- * - identity.family_member.removed (from removeFamilyMember)
- * - booking.booking.cancelled (consumed for future cascade logic)
- * - payment.payment.refunded (consumed for future notifications)
+ * - holiday-planner.identity.user-registered (from registerUser)
+ * - holiday-planner.identity.user-phone-updated (from updatePhoneNumber)
+ * - holiday-planner.identity.family-member-added (from addFamilyMember)
+ * - holiday-planner.identity.family-member-removed (from removeFamilyMember)
+ * - holiday-planner.booking.cancelled (consumed for future cascade logic)
+ * - holiday-planner.payment.refunded (consumed for future notifications)
  */
 @Configuration
 @EnableKafka
@@ -59,7 +59,7 @@ public class KafkaConfig {
      */
     @Bean
     public NewTopic userRegisteredTopic() {
-        return TopicBuilder.name("identity.user.registered")
+        return TopicBuilder.name("holiday-planner.identity.user-registered")
                 .partitions(3)
                 .replicas(1)
                 .build();
@@ -67,7 +67,7 @@ public class KafkaConfig {
 
     @Bean
     public NewTopic userPhoneUpdatedTopic() {
-        return TopicBuilder.name("identity.user.phone_updated")
+        return TopicBuilder.name("holiday-planner.identity.user-phone-updated")
                 .partitions(3)
                 .replicas(1)
                 .build();
@@ -75,7 +75,7 @@ public class KafkaConfig {
 
     @Bean
     public NewTopic familyMemberAddedTopic() {
-        return TopicBuilder.name("identity.family_member.added")
+        return TopicBuilder.name("holiday-planner.identity.family-member-added")
                 .partitions(3)
                 .replicas(1)
                 .build();
@@ -83,7 +83,7 @@ public class KafkaConfig {
 
     @Bean
     public NewTopic familyMemberRemovedTopic() {
-        return TopicBuilder.name("identity.family_member.removed")
+        return TopicBuilder.name("holiday-planner.identity.family-member-removed")
                 .partitions(3)
                 .replicas(1)
                 .build();
@@ -94,7 +94,7 @@ public class KafkaConfig {
      */
     @Bean
     public NewTopic bookingCancelledTopic() {
-        return TopicBuilder.name("booking.booking.cancelled")
+        return TopicBuilder.name("holiday-planner.booking.cancelled")
                 .partitions(3)
                 .replicas(1)
                 .build();
@@ -102,7 +102,7 @@ public class KafkaConfig {
 
     @Bean
     public NewTopic paymentRefundedTopic() {
-        return TopicBuilder.name("payment.payment.refunded")
+        return TopicBuilder.name("holiday-planner.payment.refunded")
                 .partitions(3)
                 .replicas(1)
                 .build();

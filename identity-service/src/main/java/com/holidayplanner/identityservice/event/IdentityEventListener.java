@@ -27,23 +27,22 @@ import org.springframework.stereotype.Service;
 public class IdentityEventListener {
 
     /**
-     * Listen to booking.booking.cancelled events.
+    * Listen to holiday-planner.booking.cancelled events.
      * 
      * Context: When an event term is cancelled or a booking is cancelled,
      * the identity service may need to react (e.g., notify user, cleanup).
      * 
      * @param event DomainEvent wrapping BookingCancelledEvent
      */
-    @KafkaListener(topics = "booking.booking.cancelled", groupId = "identity-service")
+    @KafkaListener(topics = "holiday-planner.booking.cancelled", groupId = "identity-service")
     public void handleBookingCancelled(DomainEvent event) {
         try {
             if (!"BookingCancelled".equals(event.getEventType())) {
-                log.warn("Unexpected event type in booking.booking.cancelled: {}", event.getEventType());
+                log.warn("Unexpected event type in holiday-planner.booking.cancelled: {}", event.getEventType());
                 return;
             }
             
-            log.info("Received BookingCancelled event: eventId={}, timestamp={}", 
-                    event.getEventId(), event.getTimestamp());
+                log.info("Received BookingCancelled event: timestamp={}", event.getTimestamp());
             
             // Future: Extract payload and check if all member's bookings are cancelled
             // if (allBookingsCancelled(memberId)) { cleanup or notify }
@@ -56,23 +55,22 @@ public class IdentityEventListener {
     }
 
     /**
-     * Listen to payment.payment.refunded events.
+    * Listen to holiday-planner.payment.refunded events.
      * 
      * Context: When a payment is refunded (e.g., event cancelled, booking refunded),
      * identity service may notify the user.
      * 
      * @param event DomainEvent wrapping PaymentRefundedEvent
      */
-    @KafkaListener(topics = "payment.payment.refunded", groupId = "identity-service")
+    @KafkaListener(topics = "holiday-planner.payment.refunded", groupId = "identity-service")
     public void handlePaymentRefunded(DomainEvent event) {
         try {
             if (!"PaymentRefunded".equals(event.getEventType())) {
-                log.warn("Unexpected event type in payment.payment.refunded: {}", event.getEventType());
+                log.warn("Unexpected event type in holiday-planner.payment.refunded: {}", event.getEventType());
                 return;
             }
             
-            log.info("Received PaymentRefunded event: eventId={}, timestamp={}", 
-                    event.getEventId(), event.getTimestamp());
+                log.info("Received PaymentRefunded event: timestamp={}", event.getTimestamp());
             
             // Future: Notify user about refund status
             // sendNotificationService.notifyRefundProcessed(userId, amount)
