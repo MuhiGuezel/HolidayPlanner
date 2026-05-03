@@ -1,5 +1,6 @@
 package com.holidayplanner.paymentservice.controller;
 
+import com.holidayplanner.paymentservice.dto.EventTermPaymentOverviewResponse;
 import com.holidayplanner.shared.model.Payment;
 import com.holidayplanner.paymentservice.service.PaymentService;
 import lombok.RequiredArgsConstructor;
@@ -38,6 +39,12 @@ public class PaymentController {
     @GetMapping("/organization/{organizationId}/pending")
     public ResponseEntity<List<Payment>> getPendingPayments(@PathVariable("organizationId") UUID organizationId) {
         return ResponseEntity.ok(paymentService.getPendingPayments(organizationId));
+    }
+
+    @GetMapping("/event-terms/{eventTermId}/overview")
+    public ResponseEntity<EventTermPaymentOverviewResponse> getEventTermPaymentOverview(
+            @PathVariable("eventTermId") UUID eventTermId) {
+        return ResponseEntity.ok(paymentService.getEventTermPaymentOverview(eventTermId));
     }
 
     @GetMapping("/booking/{bookingId}")
