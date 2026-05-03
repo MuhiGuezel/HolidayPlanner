@@ -26,16 +26,10 @@ public class EventTermQueryService {
         return EventTermResponse.from(term);
     }
 
-    /**
-     * Terms that are ACTIVE and start within the next 24 hours (exclusive lower bound {@code now}).
-     */
     public List<EventTerm> findActiveTermsStartingWithin24Hours(LocalDateTime now) {
         return eventTermRepository.findActiveTermsStartingInWindow(now, now.plusHours(24));
     }
 
-    /**
-     * ACTIVE terms whose start falls on the given calendar day (system default zone).
-     */
     public List<EventTerm> findActiveTermsStartingOn(LocalDate day) {
         LocalDateTime start = day.atStartOfDay();
         LocalDateTime end = day.plusDays(1).atStartOfDay();
