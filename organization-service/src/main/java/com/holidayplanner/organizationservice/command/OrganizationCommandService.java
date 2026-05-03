@@ -1,24 +1,26 @@
-package com.holidayplanner.organizationservice.service;
+package com.holidayplanner.organizationservice.command;
 
-import com.holidayplanner.shared.model.*;
-import com.holidayplanner.organizationservice.repository.*;
+import com.holidayplanner.organizationservice.repository.OrganizationRepository;
+import com.holidayplanner.organizationservice.repository.SponsorRepository;
+import com.holidayplanner.organizationservice.repository.TeamMemberRepository;
+import com.holidayplanner.shared.model.Organization;
+import com.holidayplanner.shared.model.Sponsor;
+import com.holidayplanner.shared.model.TeamMember;
+import com.holidayplanner.shared.model.TeamMemberRole;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 
 import java.math.BigDecimal;
 import java.time.LocalDateTime;
-import java.util.List;
 import java.util.UUID;
 
 @Service
 @RequiredArgsConstructor
-public class OrganizationService {
+public class OrganizationCommandService {
 
     private final OrganizationRepository organizationRepository;
     private final TeamMemberRepository teamMemberRepository;
     private final SponsorRepository sponsorRepository;
-
-    // --- Organization Operations ---
 
     public Organization createOrganization(String name, String bankAccount,
                                            LocalDateTime bookingStartTime) {
@@ -41,17 +43,6 @@ public class OrganizationService {
         return organizationRepository.save(org);
     }
 
-    public Organization getOrganization(UUID organizationId) {
-        return organizationRepository.findById(organizationId)
-                .orElseThrow(() -> new RuntimeException("Organization not found: " + organizationId));
-    }
-
-    public List<Organization> getAllOrganizations() {
-        return organizationRepository.findAll();
-    }
-
-    // --- TeamMember Operations ---
-
     public TeamMember addTeamMember(UUID organizationId, UUID userId, String firstName,
                                     String lastName, String email, TeamMemberRole role) {
         Organization org = organizationRepository.findById(organizationId)
@@ -71,12 +62,6 @@ public class OrganizationService {
         teamMemberRepository.deleteById(teamMemberId);
     }
 
-    public List<TeamMember> getTeamMembers(UUID organizationId) {
-        return teamMemberRepository.findByOrganization_Id(organizationId);
-    }
-
-    // --- Sponsor Operations ---
-
     public Sponsor addSponsor(UUID organizationId, String name, BigDecimal amount) {
         Organization org = organizationRepository.findById(organizationId)
                 .orElseThrow(() -> new RuntimeException("Organization not found: " + organizationId));
@@ -90,9 +75,5 @@ public class OrganizationService {
 
     public void removeSponsor(UUID sponsorId) {
         sponsorRepository.deleteById(sponsorId);
-    }
-
-    public List<Sponsor> getSponsors(UUID organizationId) {
-        return sponsorRepository.findByOrganization_Id(organizationId);
     }
 }
